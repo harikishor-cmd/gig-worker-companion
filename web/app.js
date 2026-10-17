@@ -41,13 +41,8 @@
     $('#app-name').textContent = t('app.name');
     $('#app-tagline').textContent = t('app.tagline');
     $('#lang-select').value = lang;
-    const navMap = { earnings: 'nav.earnings', safety: 'nav.safety', schemes: 'nav.schemes', document: 'documents.title', grievance: 'grievance.title' };
-    $$('.tab').forEach((btn) => {
-      const key = navMap[btn.dataset.tab];
-      if (key) btn.textContent = t(key).split(' ')[0] === 'Understand' ? 'Document' : (btn.dataset.tab === 'document' ? t('documents.title').slice(0, 12) : t(key));
-      if (btn.dataset.tab === 'document') btn.textContent = 'Document';
-      if (btn.dataset.tab === 'grievance') btn.textContent = t('grievance.title').slice(0, 14);
-    });
+    const navMap = { earnings: 'nav.earnings', safety: 'nav.safety', schemes: 'nav.schemes', document: 'nav.document', grievance: 'nav.grievance' };
+    $$('.tab').forEach((btn) => { btn.textContent = t(navMap[btn.dataset.tab]); });
     $('#earnings-title').textContent = t('earnings.title');
     $('#earnings-storage').textContent = t('earnings.storageNote');
     $('#earnings-add-label').textContent = t('earnings.addButton');
@@ -75,9 +70,12 @@
     renderEvidence();
   }
 
+  let schemesRequested = false;
   function setTab(name) {
     $$('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
     $$('.panel').forEach((p) => { p.hidden = p.dataset.panel !== name; });
+    // Lazy-load the curated schemes list the first time its tab opens (keeps first load small).
+    if (name === 'schemes' && !schemesRequested) { schemesRequested = true; loadSchemes(); }
   }
 
   function showLoading(msg) {
@@ -117,6 +115,25 @@
     box.hidden = false;
   }
   function clearError(boxId) { const b = $(boxId); if (b) { b.hidden = true; b.innerHTML = ''; } }
+
+  /**
+   * Wrap an async action so a second tap is ignored while one request is in flight
+   * (no duplicate Gemini calls); the button is disabled and marked aria-busy meanwhile.
+   */
+  function singleFlight(btnSel, fn) {
+    let busy = false;
+    return async () => {
+      if (busy) return;
+      busy = true;
+      const btn = $(btnSel);
+      const wasDisabled = btn ? btn.disabled : false;
+      if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
+      try { await fn(); } finally {
+        busy = false;
+        if (btn) { btn.disabled = wasDisabled; btn.removeAttribute('aria-busy'); }
+      }
+    };
+  }
 
   async function api(path, body) {
     const res = await fetch(path, {
@@ -235,7 +252,7 @@
     renderEvidence();
   });
 
-  async function runSummary() {
+  async function runSummaryOnce() {
     clearError('#summary-error');
     const weekStart = mondayOf();
     // include previous week too (API allows up to 200)
@@ -274,10 +291,11 @@
       showError('#summary-error', err.code || 'network', runSummary, err);
     } finally { hideLoading(); }
   }
+  const runSummary = singleFlight('#summary-btn', runSummaryOnce);
   $('#summary-btn').addEventListener('click', runSummary);
 
   // ---- Safety ----
-  async function runSafety() {
+  async function runSafetyOnce() {
     clearError('#safety-error');
     const form = $('#safety-form');
     const fd = new FormData(form);
@@ -311,6 +329,7 @@
       showError('#safety-error', err.code || 'network', runSafety, err);
     } finally { hideLoading(); }
   }
+  const runSafety = singleFlight('#safety-submit', runSafetyOnce);
   $('#safety-form').addEventListener('submit', (e) => { e.preventDefault(); runSafety(); });
 
   // ---- Schemes ----
@@ -347,7 +366,7 @@
     }
   }
 
-  async function runSchemesAsk() {
+  async function runSchemesAskOnce() {
     clearError('#schemes-error');
     const question = $('#schemes-question').value.trim();
     if (question.length < 3) return;
@@ -367,6 +386,7 @@
       showError('#schemes-error', err.code || 'network', runSchemesAsk, err);
     } finally { hideLoading(); }
   }
+  const runSchemesAsk = singleFlight('#schemes-submit', runSchemesAskOnce);
   $('#schemes-form').addEventListener('submit', (e) => { e.preventDefault(); runSchemesAsk(); });
 
   // ---- Document (resize client-side) ----
@@ -417,7 +437,7 @@
     }
   });
 
-  async function runDocument() {
+  async function runDocumentOnce() {
     clearError('#document-error');
     if (!pendingImage) return;
     showLoading(t('documents.loading'));
@@ -465,6 +485,7 @@
       showError('#document-error', code, runDocument, err);
     } finally { hideLoading(); }
   }
+  const runDocument = singleFlight('#document-submit', runDocumentOnce);
   $('#document-form').addEventListener('submit', (e) => { e.preventDefault(); runDocument(); });
 
   // ---- Grievance ----
@@ -473,7 +494,7 @@
     wrap.hidden = e.target.value !== 'other';
   });
 
-  async function runGrievance() {
+  async function runGrievanceOnce() {
     clearError('#grievance-error');
     const form = $('#grievance-form');
     const fd = new FormData(form);
@@ -522,6 +543,7 @@
       showError('#grievance-error', err.code || 'network', runGrievance, err);
     } finally { hideLoading(); }
   }
+  const runGrievance = singleFlight('#grievance-submit', runGrievanceOnce);
   $('#grievance-form').addEventListener('submit', (e) => { e.preventDefault(); runGrievance(); });
 
   function escapeHtml(s) {
@@ -549,7 +571,6 @@
     if (df.date) df.date.value = today;
     const gf = $('#grievance-form');
     if (gf.incidentDate) gf.incidentDate.value = today;
-    await loadSchemes();
     setTab('earnings');
   })();
 })();
