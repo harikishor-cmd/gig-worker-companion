@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const DEFAULT_PATH = fileURLToPath(new URL('./data/schemes.json', import.meta.url));
+const DEFAULT_PATH = fileURLToPath(new URL('../data/schemes.json', import.meta.url));
 
 export function loadSchemes(path = process.env.SCHEMES_PATH || DEFAULT_PATH) {
   try {

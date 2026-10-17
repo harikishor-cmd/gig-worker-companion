@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createGemini } from '../server/gemini.js';
+import { createGemini } from '../server/services/gemini.js';
 import { buildFacts, joinGrievanceBody } from '../server/routes/grievance.js';
-import { normalizeScript } from '../server/lang.js';
-import { schemas } from '../server/validation.js';
+import { normalizeScript } from '../server/services/lang.js';
+import { schemas } from '../server/validation/schemas.js';
 
 const okResponse = (obj) => ({ ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(obj) }] } }] }) });
 

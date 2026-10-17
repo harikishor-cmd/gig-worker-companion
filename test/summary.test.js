@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { makeApp } from './helpers.js';
-import { computeWeekStats } from '../server/stats.js';
+import { computeWeekStats } from '../server/services/stats.js';
 
 const e = (o) => ({ platform: 'swiggy', gross: 1000, tips: 0, expenses: 200, hours: 5, trips: 10, shift: 'evening', ...o });
 

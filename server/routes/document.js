@@ -1,7 +1,7 @@
 // Call D: Gemini Vision explains a document photo. The image is never stored or logged.
 import { Router } from 'express';
-import { schemas, validate } from '../validation.js';
-import { ok, fail, handler } from '../envelope.js';
+import { schemas, validate } from '../validation/schemas.js';
+import { ok, fail, handler } from '../http/envelope.js';
 
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 

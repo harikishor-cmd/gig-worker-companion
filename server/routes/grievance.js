@@ -1,8 +1,8 @@
 // Call E: formal complaint draft from validated facts + the worker's own logged earnings as evidence.
 import { Router } from 'express';
-import { schemas, validate } from '../validation.js';
-import { numbersIn } from '../stats.js';
-import { ok, handler } from '../envelope.js';
+import { schemas, validate } from '../validation/schemas.js';
+import { numbersIn } from '../services/stats.js';
+import { ok, handler } from '../http/envelope.js';
 
 // Static verified complaint channels (never generated). QA re-verifies before submission.
 export const COMPLAINT_CHANNELS = [

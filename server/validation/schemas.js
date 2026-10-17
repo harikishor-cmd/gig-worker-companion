@@ -1,7 +1,7 @@
 // zod schemas for all 5 endpoints. Unknown fields are rejected (.strict()), so nothing
 // outside the whitelist can reach a prompt.
 import { z } from 'zod';
-import { SUPPORTED_LANGS } from './lang.js';
+import { SUPPORTED_LANGS } from '../services/lang.js';
 
 export const lang = z.enum(SUPPORTED_LANGS);
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD').refine((d) => !Number.isNaN(Date.parse(`${d}T00:00:00Z`)), 'invalid date');

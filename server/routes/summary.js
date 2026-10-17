@@ -1,8 +1,8 @@
 // Call A: weekly earnings summary. Code computes every number; Gemini only explains them.
 import { Router } from 'express';
-import { schemas, validate } from '../validation.js';
-import { computeWeekStats, allowedNumbers, numbersIn } from '../stats.js';
-import { ok, handler } from '../envelope.js';
+import { schemas, validate } from '../validation/schemas.js';
+import { computeWeekStats, allowedNumbers, numbersIn } from '../services/stats.js';
+import { ok, handler } from '../http/envelope.js';
 
 const SYSTEM = `You help an Indian gig worker understand their own week of earnings.
 You are given ONLY numbers computed from their logged entries. Rules:

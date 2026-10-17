@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { createApp } from '../server/app.js';
-import { createCache } from '../server/cache.js';
+import { createCache } from '../server/services/cache.js';
 
 /** App with a mocked gemini(); nothing reaches the network. */
 export function makeApp({ geminiResult = {}, schemes = [] } = {}) {

@@ -1,7 +1,7 @@
 // Call B: situational safety guidance. Emergency numbers are static and verified, never generated.
 import { Router } from 'express';
-import { schemas, validate } from '../validation.js';
-import { ok, handler } from '../envelope.js';
+import { schemas, validate } from '../validation/schemas.js';
+import { ok, handler } from '../http/envelope.js';
 
 // Static constants rendered by the UI (QA re-verifies before submission).
 export const EMERGENCY_NUMBERS = [
