@@ -16,6 +16,28 @@ export const COMPLAINT_CHANNELS = [
   { id: 'nch_web', label: 'National Consumer Helpline (online)', value: 'https://consumerhelpline.gov.in' },
 ];
 
+const NAME_PH = /\[[^\]\n]*(?:name|नाम|ਨਾਮ|ਨਾਂ)[^\]\n]*\]/iu;
+const ID_PH = /\[[^\]\n]*(?:\bid\b|आईडी|ਆਈਡੀ)[^\]\n]*\]/iu;
+const NOT_WORKER_ID = /order|ride|trip|transaction|ऑर्डर|ਆਰਡਰ/iu;
+
+/**
+ * Drop whole lines that still carry a worker-name or worker-ID placeholder (the worker left those blank),
+ * so the letter never shows "[Worker Name]" / "[Worker ID]". Order/ride ID placeholders are kept.
+ * @param {string} body
+ */
+export function stripWorkerPlaceholders(body) {
+  return String(body)
+    .split('\n')
+    .filter((line) => {
+      if (NAME_PH.test(line)) return false;
+      const m = line.match(ID_PH);
+      return !(m && !NOT_WORKER_ID.test(m[0]));
+    })
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /** Join the model's paragraph array into one plain-text letter (blank line between paragraphs) and sign with the worker's name. */
 export function joinGrievanceBody(rawBody, workerName) {
   const paras = (Array.isArray(rawBody) ? rawBody : [rawBody]).map((p) => String(p ?? '').trim()).filter(Boolean);
@@ -26,7 +48,7 @@ export function joinGrievanceBody(rawBody, workerName) {
       /\[\s*(?:(?:your\s+)?(?:full\s+)?name|(?:आपका\s+)?(?:पूरा\s+)?नाम|(?:ਤੁਹਾਡਾ\s+)?(?:ਪੂਰਾ\s+)?(?:ਨਾਮ|ਨਾਂ))\s*\]/giu,
       name,
     );
-  return body.slice(0, 6000);
+  return stripWorkerPlaceholders(body).slice(0, 6000);
 }
 
 export function buildFacts(v, today) {

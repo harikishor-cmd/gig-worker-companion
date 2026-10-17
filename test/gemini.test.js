@@ -70,6 +70,6 @@ describe('central gemini() helper', () => {
     const body = joinGrievanceBody(['To: Grievance Officer', ' Dear Sir/Madam, ', '', 'Regards,\n[Your name]'], 'Ravi Kumar');
     expect(body).toBe('To: Grievance Officer\n\nDear Sir/Madam,\n\nRegards,\nRavi Kumar');
     expect(joinGrievanceBody(['भवदीय,\n[आपका नाम]'], 'रवि')).toBe('भवदीय,\nरवि');
-    expect(joinGrievanceBody(['Regards,\n[Your name]'], undefined)).toContain('[Your name]');
+    expect(joinGrievanceBody(['Regards,\n[Your name]'], undefined)).toBe('Regards,'); // blank name: placeholder line dropped
   });
 });

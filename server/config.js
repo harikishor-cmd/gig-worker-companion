@@ -17,8 +17,8 @@ export const TOKEN_LIMITS = Object.freeze({
 });
 export const MAX_TOKENS_CEILING = 8192;
 
-/** Requests per minute per IP on /api/*. */
-export const RATE_LIMIT_PER_MIN = 30;
+/** Requests per minute per IP on /api/*. Generous because testers at a venue often share one public IP. */
+export const RATE_LIMIT_PER_MIN = 60;
 
 /** JSON body limits: small everywhere, larger only for the document image (4 MB as base64 is ~5.6 MB). */
 export const JSON_LIMIT = '32kb';

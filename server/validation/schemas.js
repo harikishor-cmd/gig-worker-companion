@@ -42,6 +42,24 @@ export const entry = z
   })
   .strict();
 
+/** Max hours that can be logged on one calendar date (sum across entries). */
+export const MAX_HOURS_PER_DAY = 24;
+
+/**
+ * Add an issue for every entry on a date whose summed hours exceed 24.
+ * @param {Array<{date:string,hours:number}>} list
+ * @param {import('zod').RefinementCtx} ctx
+ * @param {string} key array field name for the issue path
+ */
+export function checkDailyHours(list, ctx, key) {
+  const sum = new Map();
+  for (const e of list) sum.set(e.date, (sum.get(e.date) || 0) + e.hours);
+  list.forEach((e, i) => {
+    if (sum.get(e.date) > MAX_HOURS_PER_DAY + 1e-9)
+      ctx.addIssue({ code: 'custom', path: [key, i, 'hours'], message: `more than ${MAX_HOURS_PER_DAY} hours on ${e.date}` });
+  });
+}
+
 export const schemas = {
   summary: z
     .object({
@@ -49,7 +67,8 @@ export const schemas = {
       weekStart: isoDate, // Monday, local
       entries: z.array(entry).max(200), // this week + previous week only
     })
-    .strict(),
+    .strict()
+    .superRefine((v, ctx) => checkDailyHours(v.entries, ctx, 'entries')),
 
   safety: z
     .object({
@@ -125,5 +144,6 @@ export const schemas = {
     })
     .strict()
     .refine((g) => g.issue !== 'other' || g.issueOther, { path: ['issueOther'], message: 'required when issue is other' })
-    .refine((g) => !g.endDate || g.endDate >= g.incidentDate, { path: ['endDate'], message: 'must be on or after incidentDate' }),
+    .refine((g) => !g.endDate || g.endDate >= g.incidentDate, { path: ['endDate'], message: 'must be on or after incidentDate' })
+    .superRefine((g, ctx) => checkDailyHours(g.evidence, ctx, 'evidence')),
 };

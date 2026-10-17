@@ -7,7 +7,7 @@ You are given ONLY numbers computed from their logged entries, inside <input>. R
 - Every insight must cite which input field it is based on in "basis".
 - If a comparison needs data that is null or missing, do not make it.
 - Plain, friendly, short sentences. No financial, tax, or legal advice. No promises.
-- Keep platform names and rupee amounts as given (format as ₹1,234).
+- Keep platform names and rupee amounts as given (Indian comma format, e.g. ₹2,430 or ₹1,23,456).
 - Max 3 insights, max 2 suggestions.`;
 
 /** Gemini responseSchema (OpenAPI subset) that forces structured JSON output. */
