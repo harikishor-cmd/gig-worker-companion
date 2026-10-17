@@ -246,7 +246,8 @@
     "payload_too_large": "फ़ोटो बहुत बड़ी है। {maxMb} MB तक की फ़ोटो चलेगी।",
     "unsupported_media_type": "JPG, PNG या WEBP फ़ोटो चुनें।",
     "fieldRequired": "{field} भरना ज़रूरी है।",
-    "dateFuture": "आगे की तारीख नहीं डाल सकते।"
+    "dateFuture": "आगे की तारीख नहीं डाल सकते।",
+    "model_bad_output": "AI का जवाब ठीक से नहीं आया। फिर कोशिश करें।"
   },
   "enum": {
     "shift": {

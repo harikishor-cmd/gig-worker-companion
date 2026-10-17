@@ -87,10 +87,20 @@
   }
   function hideLoading() { $('#loading').hidden = true; }
 
-  function showError(boxId, code, retryFn) {
+  // Server error codes -> i18n keys (+ placeholder values). Unknown codes fall back to server_error.
+  const ERROR_ALIASES = {
+    image_too_large: 'payload_too_large',
+    unsupported_image: 'unsupported_media_type',
+    invalid_input: 'invalidInput',
+    invalid_json: 'invalidInput',
+    invalid_lang: 'invalidLang',
+    wrong_language: 'model_bad_output',
+  };
+  function showError(boxId, code, retryFn, info = {}) {
     const box = $(boxId);
-    const key = code && i18n.error && i18n.error[code] ? `error.${code}` : (code === 'network' ? 'error.network' : 'error.server_error');
-    let msg = t(key);
+    const mapped = ERROR_ALIASES[code] || code;
+    const key = mapped && i18n.error && i18n.error[mapped] ? `error.${mapped}` : (code === 'network' ? 'error.network' : 'error.server_error');
+    let msg = t(key, { maxMb: 4, seconds: info.retryAfter || 60 });
     if (msg === key) msg = t('error.server_error');
     box.innerHTML = '';
     const p = document.createElement('p');
@@ -120,6 +130,11 @@
       const e = new Error(json.error?.code || 'server_error');
       e.code = json.error?.code || 'server_error';
       e.status = res.status;
+      if (res.status === 429) {
+        const ra = Number(res.headers.get('retry-after'));
+        const m = /t=(\d+)/.exec(res.headers.get('ratelimit') || '');
+        e.retryAfter = ra > 0 ? ra : (m ? Number(m[1]) : 60);
+      }
       throw e;
     }
     return json.data;
@@ -256,7 +271,7 @@
       }
       box.innerHTML = html;
     } catch (err) {
-      showError('#summary-error', err.code || 'network', runSummary);
+      showError('#summary-error', err.code || 'network', runSummary, err);
     } finally { hideLoading(); }
   }
   $('#summary-btn').addEventListener('click', runSummary);
@@ -293,7 +308,7 @@
       }
       box.innerHTML = html;
     } catch (err) {
-      showError('#safety-error', err.code || 'network', runSafety);
+      showError('#safety-error', err.code || 'network', runSafety, err);
     } finally { hideLoading(); }
   }
   $('#safety-form').addEventListener('submit', (e) => { e.preventDefault(); runSafety(); });
@@ -349,7 +364,7 @@
       }
       box.innerHTML = html;
     } catch (err) {
-      showError('#schemes-error', err.code || 'network', runSchemesAsk);
+      showError('#schemes-error', err.code || 'network', runSchemesAsk, err);
     } finally { hideLoading(); }
   }
   $('#schemes-form').addEventListener('submit', (e) => { e.preventDefault(); runSchemesAsk(); });
@@ -447,7 +462,7 @@
       });
     } catch (err) {
       const code = err.code === 'unsupported_image' ? 'unsupported_media_type' : (err.code || 'network');
-      showError('#document-error', code, runDocument);
+      showError('#document-error', code, runDocument, err);
     } finally { hideLoading(); }
   }
   $('#document-form').addEventListener('submit', (e) => { e.preventDefault(); runDocument(); });
@@ -504,7 +519,7 @@
         a.click();
       });
     } catch (err) {
-      showError('#grievance-error', err.code || 'network', runGrievance);
+      showError('#grievance-error', err.code || 'network', runGrievance, err);
     } finally { hideLoading(); }
   }
   $('#grievance-form').addEventListener('submit', (e) => { e.preventDefault(); runGrievance(); });

@@ -1,8 +1,8 @@
 // The ONE shared Gemini helper. All routes call gemini(); nothing else talks to the API.
 // GEMINI_API_KEY is read from the environment only and never sent to the client.
-import { languageInstruction } from './lang.js';
+import { languageInstruction, normalizeDeep, isTargetScript } from './lang.js';
 
-// Default gemini-3.5-flash (2.5-flash is closed to new API keys as of 2026-10); GEMINI_MODEL env overrides it.
+// Default gemini-3.5-flash-lite (2.5-flash is closed to new API keys and 3.5-flash's free-tier rate limit is too low); GEMINI_MODEL env overrides it.
 export const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -32,14 +32,20 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODE
       contents: [{ role: 'user', parts }],
       generationConfig: { temperature: Math.min(temperature, 0.4), maxOutputTokens, responseMimeType: 'application/json', responseSchema: schema },
     };
-    // One retry on malformed JSON; never a canned fallback.
+    // One retry on malformed JSON or wrong-language output; never a canned fallback.
+    // hi/pa: stray letters from other Indic scripts are mapped into the target script first.
+    let wrongLang = false;
     for (let attempt = 0; attempt < 2; attempt++) {
       const out = await callOnce(body);
-      if (out !== undefined) return out;
+      if (out === undefined) { wrongLang = false; continue; }
+      const norm = normalizeDeep(out, lang);
+      if (isTargetScript(norm, lang)) return norm;
+      wrongLang = true;
+      console.warn(`[gemini] output not in ${lang} script (attempt ${attempt + 1})`);
     }
-    const err = new Error('Gemini returned non-JSON output');
+    const err = new Error(wrongLang ? `Gemini answered in the wrong language/script for ${lang}` : 'Gemini returned non-JSON output');
     err.status = 502;
-    err.code = 'model_bad_output';
+    err.code = wrongLang ? 'wrong_language' : 'model_bad_output';
     throw err;
   };
 

@@ -246,7 +246,8 @@
     "payload_too_large": "Photo is too big. Max {maxMb} MB.",
     "unsupported_media_type": "Please choose a JPG, PNG or WEBP photo.",
     "fieldRequired": "Please fill in {field}.",
-    "dateFuture": "Date can't be in the future."
+    "dateFuture": "Date can't be in the future.",
+    "model_bad_output": "The AI gave an unusable answer. Please try again."
   },
   "enum": {
     "shift": {
