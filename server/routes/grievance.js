@@ -1,8 +1,11 @@
 // Call E: formal complaint draft from validated facts + the worker's own logged earnings as evidence.
 import { Router } from 'express';
-import { schemas, validate } from '../validation/schemas.js';
+import { schemas } from '../validation/schemas.js';
+import { validate } from '../validation/validate.js';
 import { numbersIn } from '../services/stats.js';
-import { ok, handler } from '../http/envelope.js';
+import { ok } from '../http/envelope.js';
+import { AppError } from '../http/errors.js';
+import { logger } from '../services/logger.js';
 import { GRIEVANCE_SYSTEM, GRIEVANCE_SCHEMA } from '../prompts/grievance.js';
 
 // Static verified complaint channels (never generated). QA re-verifies before submission.
@@ -28,18 +31,18 @@ export function buildFacts(v, today) {
 
 export default function grievanceRouter({ gemini }) {
   const r = Router();
-  r.post('/', validate(schemas.grievance), handler(async (req, res) => {
+  r.post('/', validate(schemas.grievance), async (req, res) => {
     const v = req.valid;
     const facts = buildFacts(v, new Date().toISOString().slice(0, 10));
     const raw = await gemini({ lang: v.lang, system: GRIEVANCE_SYSTEM, prompt: `<facts>${JSON.stringify(facts)}</facts>`, schema: GRIEVANCE_SCHEMA, temperature: 0.3, maxOutputTokens: 8192 });
     const subject = String(raw.subject || '').trim().slice(0, 200);
     const body = joinGrievanceBody(raw.body, v.workerName);
-    if (!subject || !body) { const e = new Error('empty draft'); e.status = 502; e.code = 'model_bad_output'; throw e; }
+    if (!subject || !body) throw new AppError(502, 'model_bad_output', { message: 'empty draft' });
     // Log (not block) rupee amounts in the draft that don't appear in the submitted facts.
     const known = new Set(numbersIn(JSON.stringify(facts)));
     const unknown = numbersIn(body).filter((n) => Number(n) >= 100 && !known.has(n));
-    if (unknown.length) console.warn(`[grievance] draft mentions numbers not in facts: ${unknown.length}`);
+    if (unknown.length) logger.warn('grievance_unknown_numbers', { count: unknown.length });
     ok(res, { subject, body, channels: COMPLAINT_CHANNELS });
-  }));
+  });
   return r;
 }

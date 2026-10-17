@@ -1,6 +1,8 @@
 // The ONE shared Gemini helper. All routes call gemini(); nothing else talks to the API.
 // GEMINI_API_KEY is read from the environment only and never sent to the client.
 import { languageInstruction, normalizeDeep, isTargetScript } from './lang.js';
+import { AppError } from '../http/errors.js';
+import { logger } from './logger.js';
 
 // Default gemini-3.5-flash-lite (2.5-flash is closed to new API keys and 3.5-flash's free-tier rate limit is too low); GEMINI_MODEL env overrides it.
 export const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
@@ -21,9 +23,7 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODE
   return async function gemini({ lang, system, prompt, schema, image, temperature = 0.3, maxOutputTokens = 8192 }) {
     const langRule = languageInstruction(lang); // throws on invalid lang
     if (!apiKey) {
-      const err = new Error('GEMINI_API_KEY is not configured on the server.');
-      err.status = 503;
-      throw err;
+      throw new AppError(503, 'model_not_configured', { message: 'GEMINI_API_KEY is not configured on the server.' });
     }
     const parts = [{ text: prompt }];
     if (image) parts.push({ inline_data: { mime_type: image.mimeType, data: image.data } });
@@ -41,12 +41,11 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODE
       const norm = normalizeDeep(out, lang);
       if (isTargetScript(norm, lang)) return norm;
       wrongLang = true;
-      console.warn(`[gemini] output not in ${lang} script (attempt ${attempt + 1})`);
+      logger.warn('gemini_wrong_script', { lang, attempt: attempt + 1 });
     }
-    const err = new Error(wrongLang ? `Gemini answered in the wrong language/script for ${lang}` : 'Gemini returned non-JSON output');
-    err.status = 502;
-    err.code = wrongLang ? 'wrong_language' : 'model_bad_output';
-    throw err;
+    throw new AppError(502, wrongLang ? 'wrong_language' : 'model_bad_output', {
+      message: wrongLang ? `Gemini answered in the wrong language/script for ${lang}` : 'Gemini returned non-JSON output',
+    });
   };
 
   async function callOnce(body) {
@@ -62,11 +61,7 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODE
       if (i < 2) await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
     }
     if (!res.ok) {
-      console.error(`Gemini HTTP ${res.status}`);
-      const err = new Error(`Gemini request failed (${res.status})`);
-      err.status = 502;
-      err.code = 'model_unavailable';
-      throw err;
+      throw new AppError(502, 'model_unavailable', { message: `Gemini request failed (HTTP ${res.status})` });
     }
     const data = await res.json();
     const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') ?? '';

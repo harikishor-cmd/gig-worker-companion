@@ -1,7 +1,8 @@
 // Call B: situational safety guidance. Emergency numbers are static and verified, never generated.
 import { Router } from 'express';
-import { schemas, validate } from '../validation/schemas.js';
-import { ok, handler } from '../http/envelope.js';
+import { schemas } from '../validation/schemas.js';
+import { validate } from '../validation/validate.js';
+import { ok } from '../http/envelope.js';
 import { SAFETY_SYSTEM, SAFETY_SCHEMA } from '../prompts/safety.js';
 
 // Static constants rendered by the UI (QA re-verifies before submission).
@@ -26,7 +27,7 @@ const stripPhones = (t) => String(t).replace(/\+?\d[\d\s-]{2,}\d/g, '').replace(
 
 export default function safetyRouter({ gemini, cache }) {
   const r = Router();
-  r.post('/', validate(schemas.safety), handler(async (req, res) => {
+  r.post('/', validate(schemas.safety), async (req, res) => {
     const { lang, vehicle, shift } = req.valid;
     const situations = [...new Set(req.valid.situations)].sort();
     const input = { vehicle, shift, situations };
@@ -45,6 +46,6 @@ export default function safetyRouter({ gemini, cache }) {
       cache.set(key, guidance);
     }
     ok(res, { guidance, emergencyNumbers: EMERGENCY_NUMBERS });
-  }));
+  });
   return r;
 }

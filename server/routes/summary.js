@@ -1,15 +1,16 @@
 // Call A: weekly earnings summary. Code computes every number; Gemini only explains them.
 import { Router } from 'express';
-import { schemas, validate } from '../validation/schemas.js';
+import { schemas } from '../validation/schemas.js';
+import { validate } from '../validation/validate.js';
 import { computeWeekStats, allowedNumbers, numbersIn } from '../services/stats.js';
-import { ok, handler } from '../http/envelope.js';
+import { ok } from '../http/envelope.js';
 import { SUMMARY_SYSTEM, SUMMARY_SCHEMA } from '../prompts/summary.js';
 
 const onlyKnownNumbers = (text, allowed) => numbersIn(text).every((n) => allowed.has(n));
 
 export default function summaryRouter({ gemini, cache }) {
   const r = Router();
-  r.post('/', validate(schemas.summary), handler(async (req, res) => {
+  r.post('/', validate(schemas.summary), async (req, res) => {
     const { lang, weekStart, entries } = req.valid;
     const stats = computeWeekStats(entries, weekStart);
     // Low-data gate: no model call when there is nothing real to say.
@@ -30,6 +31,6 @@ export default function summaryRouter({ gemini, cache }) {
       cache.set(key, ai);
     }
     ok(res, { stats, ai });
-  }));
+  });
   return r;
 }

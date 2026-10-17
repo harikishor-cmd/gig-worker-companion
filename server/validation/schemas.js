@@ -71,21 +71,3 @@ export const schemas = {
     .refine((g) => g.issue !== 'other' || g.issueOther, { path: ['issueOther'], message: 'required when issue is other' })
     .refine((g) => !g.endDate || g.endDate >= g.incidentDate, { path: ['endDate'], message: 'must be on or after incidentDate' }),
 };
-
-/** Express middleware: validates req.body, puts parsed data on req.valid, else 400 with field errors. */
-export const validate = (schema) => (req, res, next) => {
-  const r = schema.safeParse(req.body ?? {});
-  if (!r.success) {
-    const langBad = r.error.issues.some((i) => i.path[0] === 'lang');
-    return res.status(400).json({
-      ok: false,
-      error: {
-        code: langBad ? 'invalid_lang' : 'invalid_input',
-        messageKey: langBad ? 'error.invalidLang' : 'error.invalidInput',
-        fields: r.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-      },
-    });
-  }
-  req.valid = r.data;
-  next();
-};

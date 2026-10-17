@@ -1,7 +1,9 @@
 // Call D: Gemini Vision explains a document photo. The image is never stored or logged.
 import { Router } from 'express';
-import { schemas, validate } from '../validation/schemas.js';
-import { ok, fail, handler } from '../http/envelope.js';
+import { schemas } from '../validation/schemas.js';
+import { validate } from '../validation/validate.js';
+import { ok } from '../http/envelope.js';
+import { AppError } from '../http/errors.js';
 import { DOCUMENT_SYSTEM, DOCUMENT_SCHEMA } from '../prompts/document.js';
 
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -19,16 +21,16 @@ const deepMask = (v) => (typeof v === 'string' ? maskIds(v) : Array.isArray(v) ?
 
 export default function documentRouter({ gemini }) {
   const r = Router();
-  r.post('/', validate(schemas.document), handler(async (req, res) => {
+  r.post('/', validate(schemas.document), async (req, res) => {
     const { lang, mimeType } = req.valid;
     const b64 = req.valid.imageBase64.replace(/[\r\n]/g, '');
-    if (Math.floor((b64.length * 3) / 4) > MAX_IMAGE_BYTES + 3) return fail(res, 413, 'image_too_large');
+    if (Math.floor((b64.length * 3) / 4) > MAX_IMAGE_BYTES + 3) throw new AppError(413, 'image_too_large');
     const buf = Buffer.from(b64, 'base64');
-    if (buf.length > MAX_IMAGE_BYTES) return fail(res, 413, 'image_too_large');
+    if (buf.length > MAX_IMAGE_BYTES) throw new AppError(413, 'image_too_large');
     const real = sniffImage(buf);
-    if (!real || real !== mimeType) return fail(res, 415, 'unsupported_image');
+    if (!real || real !== mimeType) throw new AppError(415, 'unsupported_image');
     const raw = await gemini({ lang, system: DOCUMENT_SYSTEM, prompt: 'Explain this document.', image: { mimeType: real, data: b64 }, schema: DOCUMENT_SCHEMA, temperature: 0.2, maxOutputTokens: 8192 });
     ok(res, deepMask(raw));
-  }));
+  });
   return r;
 }

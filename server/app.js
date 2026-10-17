@@ -7,6 +7,7 @@ import { createGemini } from './services/gemini.js';
 import { createCache } from './services/cache.js';
 import { loadSchemes } from './services/schemes-store.js';
 import { fail } from './http/envelope.js';
+import { notFound, errorHandler } from './http/errors.js';
 import summaryRouter from './routes/summary.js';
 import safetyRouter from './routes/safety.js';
 import schemesRouter from './routes/schemes.js';
@@ -54,15 +55,8 @@ export function createApp(deps = {}) {
   api.use('/schemes', schemesRouter({ gemini, getSchemes }));
   api.use('/document', documentRouter({ gemini }));
   api.use('/grievance', grievanceRouter({ gemini }));
-  api.use((req, res) => fail(res, 404, 'not_found'));
-  // Body-parser errors (too large / bad JSON) -> envelope
-  // eslint-disable-next-line no-unused-vars
-  api.use((err, req, res, next) => {
-    if (err.type === 'entity.too.large') return fail(res, 413, req.path.startsWith('/document') ? 'image_too_large' : 'payload_too_large');
-    if (err.type === 'entity.parse.failed') return fail(res, 400, 'invalid_json');
-    console.error(err);
-    return fail(res, 500, 'server_error');
-  });
+  api.use(notFound);
+  api.use(errorHandler);
   app.use('/api', api);
 
   app.get('/healthz', (req, res) => res.json({ ok: true }));
