@@ -39,6 +39,19 @@ export function stripWorkerPlaceholders(body) {
     .trim();
 }
 
+/**
+ * Remove stray commas the model sometimes emits (e.g. "To:,Officer,,Zomato"): no comma right after a colon,
+ * no doubled commas, no comma at the start of a line. Indian-format amounts (₹1,23,456) are untouched.
+ * @param {string} text
+ */
+export function tidyPunctuation(text) {
+  return String(text)
+    .replace(/([:：])[ \t]*(?:,[ \t]*)+/g, '$1 ')
+    .replace(/,(?:[ \t]*,)+/g, ',')
+    .replace(/^[ \t]*,[ \t]*/gm, '')
+    .replace(/,(?=\S)(?!\d)/g, ', ');
+}
+
 /** Join the model's paragraph array into one plain-text letter (blank line between paragraphs) and sign with the worker's name. */
 export function joinGrievanceBody(rawBody, workerName) {
   const paras = (Array.isArray(rawBody) ? rawBody : [rawBody]).map((p) => String(p ?? '').trim()).filter(Boolean);
@@ -49,7 +62,7 @@ export function joinGrievanceBody(rawBody, workerName) {
       /\[\s*(?:(?:your\s+)?(?:full\s+)?name|(?:आपका\s+)?(?:पूरा\s+)?नाम|(?:ਤੁਹਾਡਾ\s+)?(?:ਪੂਰਾ\s+)?(?:ਨਾਮ|ਨਾਂ))\s*\]/giu,
       name,
     );
-  return stripWorkerPlaceholders(body).slice(0, 6000);
+  return tidyPunctuation(stripWorkerPlaceholders(body)).slice(0, 6000);
 }
 
 export function buildFacts(v, today) {

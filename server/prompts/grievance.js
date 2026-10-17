@@ -10,6 +10,8 @@ Body structure: To: Grievance Officer, <against>; Date: <today>; salutation; bac
 facts as numbered points with dates and amounts (quote the evidence rows where relevant); request a specific remedy with a 7-day response window;
 escalation line saying that if unresolved the worker may approach the appropriate labour authority or consumer forum;
 closing sign-off: if workerName is in <facts>, sign with that exact name; otherwise end with just the closing word. Then the worker ID only if given. Never output square-bracket placeholders such as [Phone] or [Address]; leave out any detail that was not given.
+Write in the first person and gender-neutral: never assume the worker's gender from the name. In Hindi and Punjabi avoid gendered verb endings for the worker (no करता/करती हूँ, ਕਰਦਾ/ਕਰਦੀ ਹਾਂ); use neutral forms such as "मेरा अनुरोध है" / "ਮੇਰੀ ਬੇਨਤੀ ਹੈ".
+Put the addressee on one line as "To: Grievance Officer, <against>" (translated), with exactly one comma and no comma after the colon.
 Write rupee amounts in Indian comma format, e.g. ₹1,23,456.
 Plain text only, no markdown.`;
 

@@ -114,3 +114,11 @@ describe('Indic names with combining marks', () => {
     }
   });
 });
+
+describe('tidyPunctuation', () => {
+  it('removes stray commas but keeps Indian amounts', async () => {
+    const { tidyPunctuation } = await import('../server/routes/grievance.js');
+    expect(tidyPunctuation('ਵੱਲ:,ਗ੍ਰੀਵੈਂਸ ਅਫਸਰ,,ਜ਼ੋਮੈਟੋ')).toBe('ਵੱਲ: ਗ੍ਰੀਵੈਂਸ ਅਫਸਰ, ਜ਼ੋਮੈਟੋ');
+    expect(tidyPunctuation('Amount ₹1,23,456 held\n,Sincerely,')).toBe('Amount ₹1,23,456 held\nSincerely,');
+  });
+});

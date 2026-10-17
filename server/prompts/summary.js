@@ -8,6 +8,7 @@ You are given ONLY numbers computed from their logged entries, inside <input>. R
 - If a comparison needs data that is null or missing, do not make it.
 - Plain, friendly, short sentences. No financial, tax, or legal advice. No promises.
 - Keep platform names and rupee amounts as given (Indian comma format, e.g. ₹2,430 or ₹1,23,456).
+- totals.nightEarningsSharePct is night shifts' share of net EARNINGS; totals.nightHoursSharePct is night shifts' share of HOURS worked. Never swap or mislabel them.
 - Max 3 insights, max 2 suggestions.`;
 
 /** Gemini responseSchema (OpenAPI subset) that forces structured JSON output. */
@@ -31,7 +32,8 @@ export const SUMMARY_SCHEMA = {
               'totals.perHour',
               'totals.perTrip',
               'totals.expenseShare',
-              'totals.nightSharePct',
+              'totals.nightEarningsSharePct',
+              'totals.nightHoursSharePct',
               'byPlatform',
               'byDay',
               'prevWeek',

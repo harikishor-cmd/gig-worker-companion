@@ -14,7 +14,8 @@ function aggregate(entries) {
     expenses = 0,
     hours = 0,
     trips = 0,
-    nightNet = 0;
+    nightNet = 0,
+    nightHours = 0;
   const byDay = new Map();
   const byPlatform = new Map();
   for (const e of entries) {
@@ -24,7 +25,10 @@ function aggregate(entries) {
     expenses = r2(expenses + (e.expenses || 0));
     hours = r2(hours + e.hours);
     trips += e.trips || 0;
-    if (e.shift === 'night') nightNet = r2(nightNet + net);
+    if (e.shift === 'night') {
+      nightNet = r2(nightNet + net);
+      nightHours = r2(nightHours + e.hours);
+    }
     const d = byDay.get(e.date) || { date: e.date, net: 0, hours: 0 };
     d.net = r2(d.net + net);
     d.hours = r2(d.hours + e.hours);
@@ -49,7 +53,8 @@ function aggregate(entries) {
       perHour: div(net, hours),
       perTrip: div(net, trips),
       expenseShare: div(expenses, gross + tips),
-      nightSharePct: net > 0 ? Math.round((nightNet / net) * 100) : null,
+      nightEarningsSharePct: net > 0 ? Math.round((nightNet / net) * 100) : null,
+      nightHoursSharePct: hours > 0 ? Math.round((nightHours / hours) * 100) : null,
     },
     byDay: days,
     byPlatform: [...byPlatform.values()].map((p) => ({ ...p, perHour: div(p.net, p.hours) })),

@@ -44,7 +44,8 @@ describe('computeWeekStats', () => {
       daysWorked: 2,
       perHour: 172.73,
       perTrip: 95,
-      nightSharePct: 53,
+      nightEarningsSharePct: 53,
+      nightHoursSharePct: 55,
     });
     expect(s.bestDay).toBe('2026-10-13');
     expect(s.prevWeek).toEqual({ net: 800, perHour: 200 });
