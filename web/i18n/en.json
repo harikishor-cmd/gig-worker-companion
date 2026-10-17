@@ -1,0 +1,317 @@
+{
+  "app": {
+    "name": "Gig Saathi",
+    "tagline": "Your helper for delivery and ride work"
+  },
+  "common": {
+    "skipToContent": "Skip to main content",
+    "back": "Back",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Please wait…",
+    "required": "Required",
+    "optional": "Optional",
+    "aiNote": "Written by Gemini AI. It can make mistakes, please check.",
+    "notLegalAdvice": "This is not legal advice.",
+    "close": "Close",
+    "edit": "Edit",
+    "resultReady": "Result is ready"
+  },
+  "lang": {
+    "pickerTitle": "Choose your language",
+    "pickerHint": "You can change it anytime from the top bar.",
+    "continue": "Continue",
+    "headerButton": "Language: {language}",
+    "changed": "Language changed to {language}",
+    "groupLabel": "Language",
+    "names": {
+      "hi": "हिंदी (Hindi)",
+      "pa": "ਪੰਜਾਬੀ (Punjabi)",
+      "en": "English"
+    }
+  },
+  "nav": {
+    "label": "Main menu",
+    "home": "Home",
+    "earnings": "Earnings",
+    "safety": "Safety",
+    "schemes": "Schemes",
+    "more": "More"
+  },
+  "home": {
+    "greeting": "What do you need help with?",
+    "tiles": {
+      "earnings": {
+        "title": "My earnings",
+        "desc": "Note daily income, get a weekly summary"
+      },
+      "safety": {
+        "title": "Safety tips",
+        "desc": "Advice for your shift and vehicle"
+      },
+      "schemes": {
+        "title": "Government schemes",
+        "desc": "e-Shram, PM-SYM and more, with official links"
+      },
+      "documents": {
+        "title": "Understand a document",
+        "desc": "Take a photo, get a simple explanation"
+      },
+      "grievance": {
+        "title": "Write a complaint",
+        "desc": "Get a ready complaint to copy or download"
+      }
+    }
+  },
+  "more": {
+    "title": "More tools"
+  },
+  "earnings": {
+    "title": "My earnings",
+    "addButton": "Add entry",
+    "saved": "Entry saved",
+    "deleted": "Entry deleted",
+    "deleteConfirm": "Delete this entry?",
+    "listLabel": "Your entries",
+    "weekTotal": "This week you kept ₹{amount} in {hours} hours",
+    "empty": {
+      "title": "No entries this week",
+      "body": "Log a day's work to see your summary."
+    },
+    "storageNote": "Entries stay only on this phone.",
+    "summary": {
+      "button": "Weekly summary",
+      "disabledHint": "Add at least one entry first.",
+      "title": "Weekly summary",
+      "loading": "Gemini is reading your week…",
+      "basedOn": "Based on your {count} entries",
+      "lowData": "Add entries on at least 2 days to get tips from Gemini.",
+      "insightsTitle": "Gemini's tips"
+    },
+    "form": {
+      "date": "Date",
+      "platform": "App",
+      "platformOther": "App name",
+      "shift": "Shift",
+      "gross": "Paid by app (₹)",
+      "grossHint": "Include incentives",
+      "tips": "Tips (₹)",
+      "expenses": "Petrol and other costs (₹)",
+      "hours": "Hours worked",
+      "trips": "Orders / rides",
+      "note": "Note (stays on phone)",
+      "amountInvalid": "Enter an amount from 0 to {max}.",
+      "hoursInvalid": "Hours must be more than 0 and up to 24.",
+      "tripsInvalid": "Enter a whole number from 0 to 200."
+    },
+    "entryLine": "{platform} · {shift}: ₹{net} in {hours} h",
+    "deleteLabel": "Delete entry: {date}, ₹{net}",
+    "stats": {
+      "net": "Kept after costs",
+      "perHour": "Per hour",
+      "nightShare": "From night work",
+      "vsLastWeek": "vs last week: {delta}%",
+      "computedNote": "Numbers are worked out from your entries, not by AI."
+    }
+  },
+  "safety": {
+    "title": "Safety tips",
+    "submit": "Get tips",
+    "loading": "Gemini is preparing tips…",
+    "resultTitle": "Tips for you",
+    "shiftLabel": "When is your shift?",
+    "vehicleLabel": "Your vehicle",
+    "situationsLabel": "Anything today? (optional, pick any)",
+    "situation": {
+      "rain_fog": "Rain or fog",
+      "late_night_drop": "Late-night drop",
+      "unfamiliar_area": "New area",
+      "long_hours": "Long hours",
+      "harassment": "Someone troubling me"
+    },
+    "emergencyTitle": "In danger? Call now",
+    "call112": "Call 112 (emergency)",
+    "call1091": "Call 1091 (women helpline)"
+  },
+  "schemes": {
+    "title": "Government schemes",
+    "intro": "Only from official government sources. Checked on {date}.",
+    "officialSource": "From official source",
+    "openSource": "Open official page for {scheme} (opens new tab)",
+    "details": "See details",
+    "empty": "Couldn't load the scheme list.",
+    "ask": {
+      "title": "Ask about these schemes",
+      "label": "Your question",
+      "placeholder": "e.g. Can I get a pension?",
+      "submit": "Ask",
+      "loading": "Checking our official data…",
+      "citedFrom": "Based on: {schemes}",
+      "notFound": "This is not in our verified list. Please check the official page.",
+      "fallbackEshram": "e-Shram official portal",
+      "fallbackMyScheme": "myScheme official portal",
+      "usesProfile": "Your profile (age, work) is sent to help match.",
+      "groundedNote": "Answer uses only our verified scheme list."
+    },
+    "lastVerified": "Last checked: {date}",
+    "benefits": "What you get",
+    "eligibility": "Who can join",
+    "contribution": "Your contribution",
+    "howToApply": "How to apply",
+    "documents": "Papers needed",
+    "helpline": "Helpline",
+    "officialLinks": "Official links",
+    "sources": "Sources",
+    "sourceLink": "Source",
+    "sourceLinkLabel": "Official source for this point (opens new tab)",
+    "englishOnly": "Shown in English: not translated yet"
+  },
+  "documents": {
+    "title": "Understand a document",
+    "intro": "Take a clear photo of a letter, notice or form.",
+    "takePhoto": "Take photo",
+    "upload": "Choose from gallery",
+    "previewAlt": "Photo you selected",
+    "explain": "Explain this",
+    "retake": "Choose another photo",
+    "loading": "Gemini is reading the document…",
+    "resultTitle": "What this document says",
+    "privacy": "Your photo is sent only to explain it and is not stored. Hide Aadhaar or bank numbers if you can.",
+    "unreadable": "Could not read this photo. Try a clearer photo in good light.",
+    "result": {
+      "whatItIs": "What it is",
+      "whatToDo": "What you should do",
+      "datesAmounts": "Dates and amounts written on it"
+    },
+    "notDocument": "This doesn't look like a document. Try a photo of a letter or notice."
+  },
+  "grievance": {
+    "title": "Write a complaint",
+    "submit": "Write my complaint",
+    "loading": "Gemini is writing your complaint…",
+    "draftTitle": "Your complaint draft",
+    "draftLabel": "Complaint text, you can edit it",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download .txt",
+    "downloadFileName": "complaint-{date}.txt",
+    "reviewNote": "Read it once and fix any wrong detail before sending.",
+    "startOver": "Start again",
+    "form": {
+      "against": "Complaint against",
+      "againstPlaceholder": "App or company name",
+      "issue": "What's the problem?",
+      "issueOther": "Describe the problem in short",
+      "incidentDate": "When did it happen?",
+      "endDate": "Till when? (if it went on for days)",
+      "details": "What happened?",
+      "detailsPlaceholder": "In your own words. Add order or ride ID if you have it.",
+      "detailsCount": "{used} / {max} letters (at least {min})",
+      "amount": "Amount involved (₹)",
+      "desiredOutcome": "What do you want?",
+      "desiredOutcomePlaceholder": "e.g. pay my pending money, start my ID again",
+      "workerName": "Your name",
+      "workerId": "Your partner / driver ID",
+      "evidence": "Your logged earnings for these dates",
+      "evidenceHint": "Ticked rows go into the complaint as proof.",
+      "evidenceNone": "No logged entries for these dates.",
+      "desiredOutcomeCount": "{used} / {max} letters"
+    },
+    "channels": {
+      "title": "Where to send it",
+      "platform": "The app's help / support section",
+      "nch": "National Consumer Helpline: call 1915",
+      "nchWeb": "consumerhelpline.gov.in (opens new tab)"
+    },
+    "issue": {
+      "payment_withheld": "Payment not received / held back",
+      "account_deactivation": "ID blocked",
+      "unsafe_conditions": "Unsafe work conditions",
+      "harassment": "Misbehaviour / harassment",
+      "insurance_claim": "Accident / insurance claim",
+      "other": "Something else"
+    }
+  },
+  "error": {
+    "network": "Could not connect. Check your internet and try again.",
+    "offline": "You are offline. Your saved entries still work; AI help needs internet.",
+    "rate_limited": "Too many requests right now. Try again in {seconds} seconds.",
+    "server_error": "Something went wrong on our side. Please try again.",
+    "model_unavailable": "The AI is not responding right now. Please try again.",
+    "model_not_configured": "AI help is not set up on this server yet.",
+    "invalidInput": "Please fix the fields marked with ⚠.",
+    "invalidLang": "Language not supported. Please pick again.",
+    "payload_too_large": "Photo is too big. Max {maxMb} MB.",
+    "unsupported_media_type": "Please choose a JPG, PNG or WEBP photo.",
+    "fieldRequired": "Please fill in {field}.",
+    "dateFuture": "Date can't be in the future."
+  },
+  "enum": {
+    "shift": {
+      "day": "Day",
+      "evening": "Evening",
+      "night": "Night"
+    },
+    "vehicle": {
+      "two_wheeler": "Bike / scooter",
+      "bicycle": "Cycle",
+      "car_auto": "Car / auto",
+      "on_foot": "On foot"
+    },
+    "platform": {
+      "zomato": "Zomato",
+      "swiggy": "Swiggy",
+      "uber": "Uber",
+      "ola": "Ola",
+      "rapido": "Rapido",
+      "blinkit": "Blinkit",
+      "zepto": "Zepto",
+      "urban_company": "Urban Company",
+      "porter": "Porter",
+      "other": "Other"
+    },
+    "ageBand": {
+      "18-24": "18–24",
+      "25-34": "25–34",
+      "35-44": "35–44",
+      "45-59": "45–59",
+      "60+": "60+"
+    }
+  },
+  "profile": {
+    "title": "A little about your work",
+    "intro": "4 quick taps. Saved only on this phone. Used to fill in forms for you.",
+    "step": "Step {current} of {total}",
+    "q": {
+      "vehicle": "How do you get around for work?",
+      "shift": "When do you mostly work?",
+      "platforms": "Which apps do you work on? (up to 3)",
+      "ageBand": "Your age"
+    },
+    "ageWhy": "Some schemes depend on age.",
+    "platformsMax": "You can pick up to 3.",
+    "next": "Next",
+    "skip": "Skip for now",
+    "done": "Done",
+    "saved": "Profile saved",
+    "editButton": "My work details"
+  },
+  "chip": {
+    "regionLabel": "Next step",
+    "nightShareSafety": "Night work is {percent}% of your income: safety tips",
+    "toSafety": "Safety tips for your shift",
+    "toSchemes": "Schemes for you",
+    "toDocument": "Got a notice or letter? Get it explained",
+    "toGrievance": "Draft a complaint",
+    "toEarnings": "Log today's earnings",
+    "prefilled": "Filled in from {source}. Please check.",
+    "source": {
+      "profile": "your profile",
+      "summary": "your weekly summary",
+      "document": "your document",
+      "safety": "your safety choices"
+    }
+  }
+}

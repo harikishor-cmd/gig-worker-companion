@@ -1,0 +1,401 @@
+{
+  "dataset": "gig-worker-companion-schemes",
+  "version": "1.0.0",
+  "last_verified": "2026-10-17",
+  "verification_method": "Each fact was read on the listed official page (gov.in / nic / sansad.in / pib) on 2026-10-17 IST. The Hindi names follow official usage. The Punjabi names are translations and need a native-speaker check.",
+  "grounding_rule": "Gemini answers about schemes MUST use only this file. Source URLs shown to users come from this file, never from model output.",
+  "disclaimer": {
+    "en": "Information only. Final eligibility is decided by the official scheme authority.",
+    "hi": "केवल जानकारी हेतु। अंतिम पात्रता संबंधित सरकारी विभाग तय करता है।",
+    "pa": "ਸਿਰਫ਼ ਜਾਣਕਾਰੀ ਲਈ। ਅੰਤਿਮ ਯੋਗਤਾ ਸਬੰਧਤ ਸਰਕਾਰੀ ਵਿਭਾਗ ਤੈਅ ਕਰਦਾ ਹੈ।"
+  },
+  "schemes": [
+    {
+      "id": "eshram",
+      "type": "registration",
+      "name": {
+        "en": "e-Shram (National Database of Unorganised Workers)",
+        "hi": "ई-श्रम",
+        "pa": "ਈ-ਸ਼ਰਮ"
+      },
+      "ministry": "Ministry of Labour & Employment",
+      "sources": [
+        {
+          "label": "e-Shram FAQs (official)",
+          "url": "https://eshram.gov.in/faqs"
+        },
+        {
+          "label": "e-Shram home",
+          "url": "https://eshram.gov.in/"
+        },
+        {
+          "label": "Lok Sabha Starred Q.6, 20.07.2026 (platform-worker module, 10.65 lakh registered)",
+          "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AS6_FOG5JC.pdf"
+        }
+      ],
+      "eligibility": {
+        "age_min": 16,
+        "age_max": null,
+        "monthly_income_max_inr": null,
+        "must_be": [
+          "unorganised worker (home-based, self-employed or wage worker in unorganised sector)"
+        ],
+        "exclusions": [
+          "member of EPFO",
+          "member of ESIC"
+        ],
+        "platform_workers": "Simplified registration module for platform workers launched 12.03.2025",
+        "notes": "FAQ Q29: no income criteria. FAQ Q30: aged 16 and above. No upper age is stated on the FAQ page."
+      },
+      "benefits": [
+        "12-digit Universal Account Number (UAN) card",
+        "Single login (One-Stop-Solution) to see and apply for integrated schemes incl. PM-SYM, PMJJBY, PMSBY, AB-PMJAY (FAQ Q9)",
+        "Registration is the route through which platform-worker AB-PMJAY cover is to be delivered (not yet launched, see pmjay entry)"
+      ],
+      "documents": [
+        "Aadhaar number",
+        "Aadhaar-linked mobile number (else biometric at CSC/State Seva Kendra)"
+      ],
+      "how_to_apply": [
+        "Self-register at eshram.gov.in (web), the eShram mobile app or UMANG",
+        "Or assisted at a Common Service Centre (CSC) / State Seva Kendra; no documents to submit, carry Aadhaar + mobile"
+      ],
+      "helpline": "14434 / 1800-889-6811 (9am-6pm daily, per eshram.gov.in header)",
+      "cost": "Free",
+      "verification": "verified",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "pmsym",
+      "type": "pension",
+      "name": {
+        "en": "Pradhan Mantri Shram Yogi Maan-dhan (PM-SYM)",
+        "hi": "प्रधानमंत्री श्रम योगी मान-धन",
+        "pa": "ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਸ਼ਰਮ ਯੋਗੀ ਮਾਨ-ਧਨ"
+      },
+      "ministry": "Ministry of Labour & Employment (LIC is pension fund manager)",
+      "sources": [
+        {
+          "label": "maandhan.in (official)",
+          "url": "https://maandhan.in/"
+        },
+        {
+          "label": "e-Shram Social Security Welfare Schemes",
+          "url": "https://eshram.gov.in/social-security-welfare-schemes"
+        },
+        {
+          "label": "PIB backgrounder on PM-SYM (Mar 2025)",
+          "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2025/mar/doc202534512301.pdf"
+        },
+        {
+          "label": "Lok Sabha Unstarred Q.2324, 03.08.2026",
+          "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AU2324_8zVBRG.pdf"
+        }
+      ],
+      "eligibility": {
+        "age_min": 18,
+        "age_max": 40,
+        "monthly_income_max_inr": 15000,
+        "must_be": [
+          "Indian citizen",
+          "unorganised worker"
+        ],
+        "exclusions": [
+          "member of EPFO",
+          "member of ESIC",
+          "member of NPS (Govt-funded / contributed by Central Govt)",
+          "income-tax payer/assessee",
+          "receiving benefit from another government pension scheme (per PIB backgrounder)"
+        ]
+      },
+      "benefits": [
+        "Assured pension Rs 3,000/month after age 60",
+        "On death of beneficiary, spouse gets 50% of pension",
+        "If husband and wife both join: Rs 6,000/month jointly"
+      ],
+      "contribution": "Rs 55 to Rs 200 per month depending on entry age; 50% by worker, equal matching by Central Government",
+      "documents": [
+        "Aadhaar",
+        "Savings bank / Jan Dhan account with IFSC",
+        "Mobile number"
+      ],
+      "how_to_apply": [
+        "Self-enrol at maandhan.in",
+        "Or at a Common Service Centre (CSC)",
+        "Or via e-Shram One-Stop-Solution login"
+      ],
+      "helpline": "14434",
+      "verification": "verified",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "pmjjby",
+      "type": "life_insurance",
+      "name": {
+        "en": "Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY)",
+        "hi": "प्रधानमंत्री जीवन ज्योति बीमा योजना",
+        "pa": "ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਜੀਵਨ ਜੋਤੀ ਬੀਮਾ ਯੋਜਨਾ"
+      },
+      "ministry": "Department of Financial Services, Ministry of Finance",
+      "sources": [
+        {
+          "label": "DFS PMJJBY page (official)",
+          "url": "https://financialservices.gov.in/pmjjby"
+        },
+        {
+          "label": "Jan Suraksha portal",
+          "url": "https://jansuraksha.gov.in/"
+        },
+        {
+          "label": "e-Shram Social Security Welfare Schemes",
+          "url": "https://eshram.gov.in/social-security-welfare-schemes"
+        }
+      ],
+      "eligibility": {
+        "age_min": 18,
+        "age_max": 50,
+        "monthly_income_max_inr": null,
+        "must_be": [
+          "individual (single or joint) savings account holder at a participating bank or post office",
+          "consent to auto-debit"
+        ],
+        "exclusions": [
+          "can join through only ONE bank/post-office account"
+        ]
+      },
+      "benefits": [
+        "Rs 2 lakh life cover on death due to any cause",
+        "One-year cover 1 June-31 May, renewable"
+      ],
+      "contribution": "Rs 436/year auto-debited. Pro-rata on first enrolment: Jun-Aug Rs 436, Sep-Nov Rs 342, Dec-Feb Rs 228, Mar-May Rs 114. Full Rs 436 on renewal.",
+      "documents": [
+        "Bank / post-office savings account",
+        "Aadhaar (e-Shram page says account with Aadhaar)"
+      ],
+      "how_to_apply": [
+        "Enrol at your bank branch / post office or via the bank's net-banking/app by giving auto-debit consent",
+        "Also listed in e-Shram One-Stop-Solution"
+      ],
+      "helpline": "National toll-free 1800-180-1111 / 1800-110-001 (jansuraksha.gov.in)",
+      "verification": "verified",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "pmsby",
+      "type": "accident_insurance",
+      "name": {
+        "en": "Pradhan Mantri Suraksha Bima Yojana (PMSBY)",
+        "hi": "प्रधानमंत्री सुरक्षा बीमा योजना",
+        "pa": "ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਸੁਰੱਖਿਆ ਬੀਮਾ ਯੋਜਨਾ"
+      },
+      "ministry": "Department of Financial Services, Ministry of Finance",
+      "sources": [
+        {
+          "label": "DFS PMSBY page (official)",
+          "url": "https://financialservices.gov.in/pmsby"
+        },
+        {
+          "label": "Jan Suraksha portal",
+          "url": "https://jansuraksha.gov.in/"
+        },
+        {
+          "label": "e-Shram Social Security Welfare Schemes",
+          "url": "https://eshram.gov.in/social-security-welfare-schemes"
+        }
+      ],
+      "eligibility": {
+        "age_min": 18,
+        "age_max": 70,
+        "monthly_income_max_inr": null,
+        "must_be": [
+          "individual (single or joint) savings account holder at a participating bank or post office",
+          "consent to auto-debit"
+        ],
+        "exclusions": [
+          "can join through only ONE bank/post-office account"
+        ]
+      },
+      "benefits": [
+        "Rs 2 lakh on accidental death",
+        "Rs 2 lakh on total & irrecoverable loss of both eyes / both hands or feet / one eye + one hand or foot",
+        "Rs 1 lakh on loss of sight of one eye or use of one hand or foot",
+        "One-year cover 1 June-31 May, renewable"
+      ],
+      "contribution": "Rs 20/year auto-debited",
+      "documents": [
+        "Bank / post-office savings account",
+        "Aadhaar (per e-Shram page)"
+      ],
+      "how_to_apply": [
+        "Enrol at bank branch / post office or bank app with auto-debit consent",
+        "Also listed in e-Shram One-Stop-Solution"
+      ],
+      "helpline": "National toll-free 1800-180-1111 / 1800-110-001 (jansuraksha.gov.in)",
+      "why_relevant": "Road accident risk is the top occupational risk for delivery/ride workers; Rs 20/year.",
+      "verification": "verified",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "apy",
+      "type": "pension",
+      "name": {
+        "en": "Atal Pension Yojana (APY)",
+        "hi": "अटल पेंशन योजना",
+        "pa": "ਅਟਲ ਪੈਨਸ਼ਨ ਯੋਜਨਾ"
+      },
+      "ministry": "PFRDA under Department of Financial Services",
+      "sources": [
+        {
+          "label": "PFRDA APY scheme page (official)",
+          "url": "https://pfrda.org.in/schemes/atal-pension-yojana-apy"
+        },
+        {
+          "label": "PFRDA APY FAQs",
+          "url": "https://www.pfrda.org.in/w/faqs/atal-pension-yojana"
+        }
+      ],
+      "eligibility": {
+        "age_min": 18,
+        "age_max": 40,
+        "monthly_income_max_inr": null,
+        "must_be": [
+          "Indian citizen",
+          "savings account at a bank or post office"
+        ],
+        "exclusions": [
+          "anyone who is or has been an income-tax payer cannot open a NEW account from 1 Oct 2022 (existing accounts opened on or before 30 Sep 2022 continue)",
+          "only one APY account per person"
+        ]
+      },
+      "benefits": [
+        "Guaranteed minimum pension of Rs 1,000 / 2,000 / 3,000 / 4,000 / 5,000 per month from age 60, based on contribution chosen",
+        "After subscriber's death, spouse/nominee gets the pension / accumulated corpus (per e-Shram scheme page)"
+      ],
+      "contribution": "Monthly, quarterly or half-yearly auto-debit from savings account; amount depends on entry age and pension chosen (look up the official chart; do not compute)",
+      "documents": [
+        "Savings account",
+        "Mobile number (recommended)",
+        "Aadhaar (scheme is notified for Aadhaar)",
+        "Nominee and spouse details (mandatory)"
+      ],
+      "how_to_apply": [
+        "Approach the bank branch/post office where you hold the savings account (or open one)"
+      ],
+      "verification": "verified",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "pmjay",
+      "type": "health_insurance",
+      "name": {
+        "en": "Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana (AB-PMJAY)",
+        "hi": "आयुष्मान भारत - प्रधानमंत्री जन आरोग्य योजना",
+        "pa": "ਆਯੁਸ਼ਮਾਨ ਭਾਰਤ - ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਜਨ ਆਰੋਗਿਆ ਯੋਜਨਾ"
+      },
+      "ministry": "National Health Authority, Ministry of Health & Family Welfare",
+      "sources": [
+        {
+          "label": "PIB press note: Social security for gig workers (states PM-JAY for platform workers yet to be launched)",
+          "url": "https://www.pib.gov.in/PressNoteDetails.aspx?ModuleId=3&NoteId=155119&lang=1&reg=1"
+        },
+        {
+          "label": "Lok Sabha Starred Q.6, 20.07.2026 (cover to be delivered through e-Shram; no timeline)",
+          "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AS6_FOG5JC.pdf"
+        },
+        {
+          "label": "e-Shram Social Security Welfare Schemes (general eligibility categories)",
+          "url": "https://eshram.gov.in/social-security-welfare-schemes"
+        },
+        {
+          "label": "pmjay.gov.in (official site; returned 504 during verification)",
+          "url": "https://pmjay.gov.in/"
+        }
+      ],
+      "status_for_platform_workers": "ANNOUNCED_NOT_LAUNCHED",
+      "status_note": "Union Budget 2025-26 announced PM-JAY cover for platform workers registered on e-Shram. As of the Lok Sabha reply dated 20.07.2026 it is not yet rolled out and no timeline was given. The app MUST say 'announced, not yet launched; register on e-Shram to be ready' and never 'you are covered'.",
+      "eligibility": {
+        "age_min": null,
+        "age_max": null,
+        "monthly_income_max_inr": null,
+        "must_be": [
+          "Existing PM-JAY eligibility is household-based deprivation criteria (e-Shram page lists e.g. SC/ST households, families with no male member aged 16-59, people surviving on alms)"
+        ],
+        "exclusions": [],
+        "notes": "Do not run a deterministic yes/no for general PM-JAY; tell the user to check entitlement on the official PM-JAY channels. UNVERIFIED in this dataset: full SECC criteria list, beneficiary-check URL, helpline number."
+      },
+      "benefits": [
+        "Rs 5 lakh per family per year for secondary and tertiary care hospitalisation at empanelled hospitals (PIB)"
+      ],
+      "how_to_apply": [
+        "Platform workers: register on e-Shram now (prerequisite for the announced cover)",
+        "General: check entitlement via official PM-JAY channels"
+      ],
+      "verification": "verified_status_only",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "ss_code_2020",
+      "type": "law",
+      "name": {
+        "en": "Code on Social Security, 2020 - gig & platform worker provisions",
+        "hi": "सामाजिक सुरक्षा संहिता, 2020 - गिग एवं प्लेटफॉर्म कामगार प्रावधान",
+        "pa": "ਸਮਾਜਿਕ ਸੁਰੱਖਿਆ ਕੋਡ, 2020 - ਗਿਗ ਅਤੇ ਪਲੇਟਫਾਰਮ ਕਾਮਿਆਂ ਲਈ ਪ੍ਰਬੰਧ"
+      },
+      "ministry": "Ministry of Labour & Employment",
+      "sources": [
+        {
+          "label": "Lok Sabha Starred Q.6, 20.07.2026 (in force 21.11.2025; s.114; Rules notified 08.05.2026)",
+          "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AS6_FOG5JC.pdf"
+        },
+        {
+          "label": "PIB press note on social security for gig workers",
+          "url": "https://www.pib.gov.in/PressNoteDetails.aspx?ModuleId=3&NoteId=155119&lang=1&reg=1"
+        }
+      ],
+      "eligibility": {
+        "age_min": null,
+        "age_max": null,
+        "monthly_income_max_inr": null,
+        "must_be": [
+          "gig worker or platform worker as defined in the Code"
+        ],
+        "exclusions": []
+      },
+      "key_facts": [
+        "First law to define 'gig worker' and 'platform worker'; in force since 21.11.2025",
+        "Section 114(1): Government may frame schemes for life & disability cover, accident insurance, health & maternity benefits, old-age protection",
+        "Social Security Fund: aggregators contribute 1-2% of annual turnover, capped at 5% of amount paid/payable to gig/platform workers",
+        "National Social Security Board with aggregator, worker, expert and State representatives",
+        "Social Security (Central) Rules, 2026 notified 08.05.2026: mandatory registration of gig/platform workers on the Central Government portal; aggregators must share worker data via API",
+        "21 aggregators onboarded on e-Shram incl. Zomato, Blinkit, Swiggy, Ola, Uber, Rapido, Amazon, Porter, Urban Company, Flipkart (as of 20.07.2026)"
+      ],
+      "status_note": "As of 20.07.2026 the s.114 welfare schemes for gig/platform workers are still being formulated; no benefit is claimable under the Code itself yet. UNVERIFIED (secondary source only): date from which aggregator contributions start.",
+      "benefits": [],
+      "how_to_apply": [
+        "Nothing to apply for under the Code directly. Register on e-Shram (the portal used for registration)."
+      ],
+      "verification": "verified",
+      "last_verified": "2026-10-17"
+    }
+  ],
+  "excluded_or_unverified": [
+    {
+      "id": "eshram_exgratia",
+      "reason": "NOT a current benefit. The e-Shram ex-gratia (Rs 2 lakh accidental death / disability) only covers workers registered on or before 31 Mar 2022 for incidents on or before 31 Mar 2022 (MoLE guidelines dated 24.08.2023). Some news reports describe it as a current benefit. Do not show it as an active scheme.",
+      "source": "https://nduwwsmediaprodnew.blob.core.windows.net/nduwwsmedia/Mechanism-to-provide-Ex-Gratia-Payment-to-eligible-e-shram-registrants.pdf",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "punjab_state_gig_scheme",
+      "reason": "No Punjab-government welfare scheme specific to gig or platform workers could be verified on an official page. Punjab Labour Department ran e-Shram registration camps for platform workers from April 2025 (Hindustan Times, 12 Apr 2025, a news source and not official), and 22,272 platform workers in Punjab were registered on e-Shram (Govt reply reported by The Tribune). Do not invent a Punjab scheme. Direct Punjab users to e-Shram.",
+      "source": "https://www.hindustantimes.com/cities/chandigarh-news/punjab-launches-drive-to-register-gig-workers-for-ayushman-scheme-101744397785844.html",
+      "last_verified": "2026-10-17"
+    },
+    {
+      "id": "nps_traders",
+      "reason": "Real scheme (maandhan.in) but for shopkeepers/self-employed traders, not gig workers; excluded to keep scope tight.",
+      "source": "https://maandhan.in/",
+      "last_verified": "2026-10-17"
+    }
+  ]
+}

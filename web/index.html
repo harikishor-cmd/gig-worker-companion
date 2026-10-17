@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1f33" />
+  <title>Gig Saathi</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+  <header class="topbar" role="banner">
+    <div class="brand">
+      <h1 id="app-name">Gig Saathi</h1>
+      <p id="app-tagline" class="tagline"></p>
+    </div>
+    <div class="lang-wrap" role="group" aria-labelledby="lang-group-label">
+      <span id="lang-group-label" class="sr-only">Language</span>
+      <label class="sr-only" for="lang-select">Language</label>
+      <select id="lang-select" class="tap" aria-label="Language">
+        <option value="en">English</option>
+        <option value="hi">हिंदी</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+      </select>
+    </div>
+  </header>
+
+  <nav class="tabs" id="nav" aria-label="Main menu">
+    <button type="button" class="tab tap" data-tab="earnings" aria-selected="true">Earnings</button>
+    <button type="button" class="tab tap" data-tab="safety" aria-selected="false">Safety</button>
+    <button type="button" class="tab tap" data-tab="schemes" aria-selected="false">Schemes</button>
+    <button type="button" class="tab tap" data-tab="document" aria-selected="false">Document</button>
+    <button type="button" class="tab tap" data-tab="grievance" aria-selected="false">Complaint</button>
+  </nav>
+
+  <main id="main" class="main" tabindex="-1">
+    <!-- Earnings -->
+    <section id="panel-earnings" class="panel" data-panel="earnings" aria-labelledby="earnings-title">
+      <h2 id="earnings-title">My earnings</h2>
+      <p id="earnings-storage" class="hint"></p>
+      <div id="earnings-totals" class="totals card" aria-live="polite"></div>
+      <form id="earnings-form" class="card form" novalidate>
+        <h3 id="earnings-add-label">Add entry</h3>
+        <div class="grid">
+          <label>Date <input class="tap" type="date" name="date" required /></label>
+          <label>App
+            <select class="tap" name="platform" required>
+              <option value="zomato">Zomato</option>
+              <option value="swiggy">Swiggy</option>
+              <option value="uber">Uber</option>
+              <option value="ola">Ola</option>
+              <option value="rapido">Rapido</option>
+              <option value="blinkit">Blinkit</option>
+              <option value="zepto">Zepto</option>
+              <option value="urban_company">Urban Company</option>
+              <option value="porter">Porter</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Shift
+            <select class="tap" name="shift" required>
+              <option value="day">Day</option>
+              <option value="evening">Evening</option>
+              <option value="night">Night</option>
+            </select>
+          </label>
+          <label>Paid by app (₹) <input class="tap" type="number" name="gross" min="0" max="100000" step="1" required /></label>
+          <label>Tips (₹) <input class="tap" type="number" name="tips" min="0" max="100000" step="1" value="0" /></label>
+          <label>Petrol / costs (₹) <input class="tap" type="number" name="expenses" min="0" max="100000" step="1" value="0" /></label>
+          <label>Hours <input class="tap" type="number" name="hours" min="0.1" max="24" step="0.1" required /></label>
+          <label>Orders / rides <input class="tap" type="number" name="trips" min="0" max="200" step="1" value="0" /></label>
+        </div>
+        <button type="submit" class="btn primary tap" id="earnings-save">Save</button>
+      </form>
+      <ul id="earnings-list" class="list" aria-label="Your entries"></ul>
+      <button type="button" class="btn primary tap" id="summary-btn">Weekly summary</button>
+      <div id="summary-result" class="card result" hidden aria-live="polite"></div>
+      <div id="summary-error" class="error-box" hidden></div>
+    </section>
+
+    <!-- Safety -->
+    <section id="panel-safety" class="panel" data-panel="safety" hidden aria-labelledby="safety-title">
+      <h2 id="safety-title">Safety tips</h2>
+      <form id="safety-form" class="card form" novalidate>
+        <fieldset>
+          <legend id="safety-shift-label">When is your shift?</legend>
+          <label class="chip"><input type="radio" name="shift" value="day" checked /> Day</label>
+          <label class="chip"><input type="radio" name="shift" value="evening" /> Evening</label>
+          <label class="chip"><input type="radio" name="shift" value="night" /> Night</label>
+        </fieldset>
+        <fieldset>
+          <legend id="safety-vehicle-label">Your vehicle</legend>
+          <label class="chip"><input type="radio" name="vehicle" value="two_wheeler" checked /> Bike / scooter</label>
+          <label class="chip"><input type="radio" name="vehicle" value="bicycle" /> Cycle</label>
+          <label class="chip"><input type="radio" name="vehicle" value="car_auto" /> Car / auto</label>
+          <label class="chip"><input type="radio" name="vehicle" value="on_foot" /> On foot</label>
+        </fieldset>
+        <fieldset>
+          <legend id="safety-situations-label">Anything today? (optional)</legend>
+          <label class="chip"><input type="checkbox" name="situations" value="rain_fog" /> Rain or fog</label>
+          <label class="chip"><input type="checkbox" name="situations" value="late_night_drop" /> Late-night drop</label>
+          <label class="chip"><input type="checkbox" name="situations" value="unfamiliar_area" /> New area</label>
+          <label class="chip"><input type="checkbox" name="situations" value="long_hours" /> Long hours</label>
+          <label class="chip"><input type="checkbox" name="situations" value="harassment" /> Someone troubling me</label>
+        </fieldset>
+        <button type="submit" class="btn primary tap" id="safety-submit">Get tips</button>
+      </form>
+      <div id="safety-result" class="card result" hidden aria-live="polite"></div>
+      <div id="safety-error" class="error-box" hidden></div>
+      <aside class="card emergency" aria-labelledby="emergency-title">
+        <h3 id="emergency-title">In danger? Call now</h3>
+        <a class="btn danger tap" href="tel:112">Call 112</a>
+        <a class="btn danger tap" href="tel:1091">Call 1091</a>
+        <a class="btn danger tap" href="tel:108">Call 108</a>
+        <a class="btn danger tap" href="tel:1033">Call 1033</a>
+      </aside>
+    </section>
+
+    <!-- Schemes -->
+    <section id="panel-schemes" class="panel" data-panel="schemes" hidden aria-labelledby="schemes-title">
+      <h2 id="schemes-title">Government schemes</h2>
+      <p id="schemes-intro" class="hint"></p>
+      <ul id="schemes-list" class="list schemes"></ul>
+      <form id="schemes-form" class="card form" novalidate>
+        <h3 id="schemes-ask-title">Ask about these schemes</h3>
+        <label id="schemes-ask-label">Your question
+          <textarea class="tap" name="question" id="schemes-question" rows="3" minlength="3" maxlength="500" required placeholder="e.g. Can I get a pension?"></textarea>
+        </label>
+        <button type="submit" class="btn primary tap" id="schemes-submit">Ask</button>
+      </form>
+      <div id="schemes-result" class="card result" hidden aria-live="polite"></div>
+      <div id="schemes-error" class="error-box" hidden></div>
+    </section>
+
+    <!-- Document -->
+    <section id="panel-document" class="panel" data-panel="document" hidden aria-labelledby="document-title">
+      <h2 id="document-title">Understand a document</h2>
+      <p id="document-intro" class="hint"></p>
+      <p id="document-privacy" class="hint"></p>
+      <form id="document-form" class="card form" novalidate>
+        <label class="file-label tap">
+          <span id="document-upload-label">Choose from gallery</span>
+          <input type="file" id="document-file" accept="image/jpeg,image/png,image/webp" capture="environment" />
+        </label>
+        <img id="document-preview" class="preview" alt="" hidden />
+        <button type="submit" class="btn primary tap" id="document-submit" disabled>Explain this</button>
+      </form>
+      <div id="document-result" class="card result" hidden aria-live="polite"></div>
+      <div id="document-error" class="error-box" hidden></div>
+    </section>
+
+    <!-- Grievance -->
+    <section id="panel-grievance" class="panel" data-panel="grievance" hidden aria-labelledby="grievance-title">
+      <h2 id="grievance-title">Write a complaint</h2>
+      <form id="grievance-form" class="card form" novalidate>
+        <label>Complaint against
+          <input class="tap" name="against" maxlength="60" required placeholder="App or company name" />
+        </label>
+        <label>What's the problem?
+          <select class="tap" name="issue" required>
+            <option value="payment_not_received">Payment not received</option>
+            <option value="wrong_deduction">Wrong deduction</option>
+            <option value="account_deactivated">ID / account blocked</option>
+            <option value="incentive_not_paid">Incentive not paid</option>
+            <option value="accident_insurance">Accident / insurance</option>
+            <option value="harassment_safety">Harassment / safety</option>
+            <option value="other">Something else</option>
+          </select>
+        </label>
+        <label id="issue-other-wrap" hidden>Describe the problem
+          <input class="tap" name="issueOther" maxlength="100" />
+        </label>
+        <label>When did it happen?
+          <input class="tap" type="date" name="incidentDate" required />
+        </label>
+        <label>Till when? (optional)
+          <input class="tap" type="date" name="endDate" />
+        </label>
+        <label>What happened?
+          <textarea class="tap" name="details" rows="4" minlength="20" maxlength="2000" required placeholder="In your own words. Add order ID if you have it."></textarea>
+        </label>
+        <label>Amount involved (₹) (optional)
+          <input class="tap" type="number" name="amount" min="0" max="1000000" step="1" />
+        </label>
+        <label>What do you want? (optional)
+          <input class="tap" name="desiredOutcome" maxlength="300" />
+        </label>
+        <label>Your name (optional)
+          <input class="tap" name="workerName" maxlength="80" />
+        </label>
+        <label>Partner / driver ID (optional)
+          <input class="tap" name="workerId" maxlength="40" pattern="[A-Za-z0-9-]*" />
+        </label>
+        <fieldset>
+          <legend>Use logged earnings as evidence</legend>
+          <div id="grievance-evidence"></div>
+        </fieldset>
+        <button type="submit" class="btn primary tap" id="grievance-submit">Write my complaint</button>
+      </form>
+      <div id="grievance-result" class="card result" hidden aria-live="polite"></div>
+      <div id="grievance-error" class="error-box" hidden></div>
+    </section>
+  </main>
+
+  <div id="loading" class="loading" hidden role="status" aria-live="assertive">
+    <span id="loading-text">Please wait…</span>
+  </div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

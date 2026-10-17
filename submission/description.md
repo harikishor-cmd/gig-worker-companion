@@ -1,0 +1,3 @@
+# Gig Worker Companion — Project Description
+
+**Gig Worker Companion** helps delivery and ride-hailing workers in Chandigarh (and nearby cities like Mohali) in Hindi, Punjabi, or English. Riders log trips on-device; totals are computed in code, and Gemini only explains the week. Safety guidance uses shift and vehicle context, with verified emergency numbers shown separately. Curated real schemes (e-Shram, PM-SYM, and others in `schemes.json`) ground eligibility Q&A with official links. Gemini Vision explains a photographed notice, and a grievance drafter turns those facts—plus logged earnings as evidence—into a copyable or downloadable complaint. No login, no database; the Gemini API key stays server-side.
