@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { schemas, validate } from '../validation/schemas.js';
 import { ok, handler } from '../http/envelope.js';
+import { SAFETY_SYSTEM, SAFETY_SCHEMA } from '../prompts/safety.js';
 
 // Static constants rendered by the UI (QA re-verifies before submission).
 export const EMERGENCY_NUMBERS = [
@@ -10,26 +11,6 @@ export const EMERGENCY_NUMBERS = [
   { id: 'highway_helpline', number: '1033' },
   { id: 'ambulance', number: '108' },
 ];
-
-const SYSTEM = `You give practical, situational safety guidance to an Indian gig worker before or during a shift.
-Use only the situation given: vehicle, shift, situations.
-Rules:
-- Concrete, doable actions for THIS combination. No generic filler.
-- Never invent facts about a specific city, road, crime rates, or statistics. Never claim to know live conditions.
-- Never give medical diagnosis or legal advice. For immediate danger, tell them to call the emergency number (do not write phone numbers).
-- Do not discourage them from working; focus on reducing risk.
-- 3 to 6 tips, most important first; up to 5 checklist items.`;
-
-export const SAFETY_SCHEMA = {
-  type: 'object',
-  required: ['riskLevel', 'tips', 'checklist'],
-  properties: {
-    riskLevel: { type: 'string', enum: ['low', 'moderate', 'high'] },
-    riskReason: { type: 'string' },
-    tips: { type: 'array', minItems: 3, maxItems: 6, items: { type: 'object', required: ['title', 'detail'], properties: { title: { type: 'string' }, detail: { type: 'string' } } } },
-    checklist: { type: 'array', maxItems: 5, items: { type: 'string' } },
-  },
-};
 
 const LEVELS = ['low', 'moderate', 'high'];
 /** Risk floor computed in code; the model may raise it, never lower it. */
@@ -52,7 +33,7 @@ export default function safetyRouter({ gemini, cache }) {
     const key = cache.key({ f: 'B', input, lang });
     let guidance = cache.get(key);
     if (!guidance) {
-      const raw = await gemini({ lang, system: SYSTEM, prompt: JSON.stringify(input), schema: SAFETY_SCHEMA, temperature: 0.3 });
+      const raw = await gemini({ lang, system: SAFETY_SYSTEM, prompt: JSON.stringify(input), schema: SAFETY_SCHEMA, temperature: 0.3 });
       const floor = riskFloor(input);
       const model = LEVELS.includes(raw.riskLevel) ? raw.riskLevel : floor;
       guidance = {
