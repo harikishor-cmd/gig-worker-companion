@@ -117,7 +117,7 @@ export const schemas = {
         .trim()
         .min(2)
         .max(60)
-        .regex(/^[\p{L}\p{N} .&-]+$/u, 'letters, numbers and spaces only'),
+        .regex(/^[\p{L}\p{M}\p{N} .&-]+$/u, 'letters, numbers and spaces only'),
       issue: z.enum([
         'payment_not_received',
         'wrong_deduction',

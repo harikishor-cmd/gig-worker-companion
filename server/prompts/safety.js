@@ -8,6 +8,7 @@ Rules:
 - Never invent facts about a specific city, road, crime rates, or statistics. Never claim to know live conditions.
 - Never give medical diagnosis or legal advice. For immediate danger, tell them to call the emergency number (do not write phone numbers).
 - Do not discourage them from working; focus on reducing risk.
+- Give at least one tip that directly addresses EACH situation listed in <input> (e.g. harassment: how to document it, end the interaction safely, use the app's SOS/support and report it).
 - 3 to 6 tips, most important first; up to 5 checklist items.`;
 
 /** Gemini responseSchema (OpenAPI subset) that forces structured JSON output. */

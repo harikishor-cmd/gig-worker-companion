@@ -84,3 +84,15 @@ export function targetScriptRatio(value, lang) {
 
 export const MIN_TARGET_SCRIPT_RATIO = 0.2;
 export const isTargetScript = (value, lang) => targetScriptRatio(value, lang) >= MIN_TARGET_SCRIPT_RATIO;
+
+/** Count letters left from a non-target Indic script after normalization (e.g. Devanagari ष inside Punjabi). */
+export function foreignIndicCount(value, lang) {
+  const tgt = TARGET[lang];
+  if (!tgt) return 0;
+  let n = 0;
+  for (const ch of collectStrings(value).join(' ')) {
+    const cp = ch.codePointAt(0);
+    if (cp >= 0x0900 && cp < 0x0e00 && !tgt.re.test(ch) && /[\p{L}\p{M}]/u.test(ch)) n++;
+  }
+  return n;
+}

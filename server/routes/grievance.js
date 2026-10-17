@@ -18,6 +18,7 @@ export const COMPLAINT_CHANNELS = [
 
 const NAME_PH = /\[[^\]\n]*(?:name|नाम|ਨਾਮ|ਨਾਂ)[^\]\n]*\]/iu;
 const ID_PH = /\[[^\]\n]*(?:\bid\b|आईडी|ਆਈਡੀ)[^\]\n]*\]/iu;
+const PHONE_PH = /\[[^\]\n]*(?:phone|mobile|contact|address|email|फ़ोन|फोन|मोबाइल|पता|ਫ਼ੋਨ|ਫੋਨ|ਮੋਬਾਈਲ|ਪਤਾ)[^\]\n]*\]/iu;
 const NOT_WORKER_ID = /order|ride|trip|transaction|ऑर्डर|ਆਰਡਰ/iu;
 
 /**
@@ -29,7 +30,7 @@ export function stripWorkerPlaceholders(body) {
   return String(body)
     .split('\n')
     .filter((line) => {
-      if (NAME_PH.test(line)) return false;
+      if (NAME_PH.test(line) || PHONE_PH.test(line)) return false;
       const m = line.match(ID_PH);
       return !(m && !NOT_WORKER_ID.test(m[0]));
     })

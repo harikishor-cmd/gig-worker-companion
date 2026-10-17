@@ -50,7 +50,7 @@ describe('worker placeholder stripping', () => {
     );
     expect(out).not.toMatch(/Worker Name|Worker ID|Your name/);
     expect(out).toContain('[Order ID]');
-    expect(out).toContain('[Phone]');
+    expect(out).not.toContain('[Phone]');
   });
   it('handles Hindi/Punjabi placeholders and keeps the real name', () => {
     expect(stripWorkerPlaceholders('नमस्ते\n[आपका नाम]\n[ਵਰਕਰ ਆਈਡੀ]\nਧੰਨਵਾਦ')).toBe('नमस्ते\nਧੰਨਵਾਦ');
@@ -85,5 +85,32 @@ describe('browser entry validation (web/entries.js)', async () => {
     );
     expect(clean).toEqual([good]);
     expect(sanitizeEntries('not-an-array', today)).toEqual([]);
+  });
+});
+
+import { stripWorkerPlaceholders as _strip } from '../server/routes/grievance.js';
+import { foreignIndicCount as _fic } from '../server/services/lang.js';
+import { schemas as _schemas } from '../server/validation/schemas.js';
+describe('release blockers (unicode, placeholders, mixed script)', () => {
+  it('drops [Phone] placeholder lines', () => {
+    expect(_strip('Regards,\nRavi\n[Phone]')).toBe('Regards,\nRavi');
+  });
+  it('counts leftover foreign Indic letters', () => {
+    expect(_fic('ਮਿਲਣ', 'pa')).toBe(0);
+    expect(_fic('ਮਿਲष', 'pa')).toBe(1);
+  });
+});
+describe('Indic names with combining marks', () => {
+  it('accepts Hindi and Punjabi company/person names', () => {
+    for (const against of ['स्विगी डिलीवरी', 'ਜ਼ੋਮੈਟੋ ਪੰਜਾਬ']) {
+      const r = _schemas.grievance.safeParse({
+        lang: 'hi',
+        against,
+        issue: 'payment_not_received',
+        incidentDate: '2026-10-10',
+        details: 'Payout for last week was not credited at all.',
+      });
+      expect(r.success).toBe(true);
+    }
   });
 });

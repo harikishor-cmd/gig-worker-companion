@@ -21,9 +21,12 @@
   }
 
   /** Local YYYY-MM-DD (not UTC), so late-night IST entries get today's date. */
-  function todayLocal() {
-    const d = new Date();
+  /** Local-calendar YYYY-MM-DD (never toISOString, which shifts to UTC and breaks dates in IST). */
+  function ymd(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function todayLocal() {
+    return ymd(new Date());
   }
   const inrFmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
   /** One currency format everywhere: ₹2,430 (Indian grouping). */
@@ -271,7 +274,7 @@
     const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const day = (x.getDay() + 6) % 7; // Mon=0
     x.setDate(x.getDate() - day);
-    return x.toISOString().slice(0, 10);
+    return ymd(x);
   }
 
   function netOf(e) {
@@ -282,7 +285,7 @@
     const start = mondayOf();
     const endDate = new Date(start + 'T00:00:00');
     endDate.setDate(endDate.getDate() + 7);
-    const end = endDate.toISOString().slice(0, 10);
+    const end = ymd(endDate);
     return entries.filter((e) => e.date >= start && e.date < end);
   }
 
@@ -372,7 +375,7 @@
     // include previous week too (API allows up to 200)
     const prev = new Date(weekStart + 'T00:00:00');
     prev.setDate(prev.getDate() - 7);
-    const prevStart = prev.toISOString().slice(0, 10);
+    const prevStart = ymd(prev);
     const payloadEntries = window.GigEntries.sanitizeEntries(entries, todayLocal()).filter((e) => e.date >= prevStart);
     showLoading(t('earnings.summary.loading'));
     try {
@@ -681,7 +684,7 @@
     if (fd.get('workerName')) body.workerName = String(fd.get('workerName')).trim();
     if (fd.get('workerId')) body.workerId = String(fd.get('workerId')).trim();
     const errs = {};
-    if (!/^[\p{L}\p{N} .&-]{2,60}$/u.test(body.against)) errs.against = 'grievance.form.againstInvalid';
+    if (!/^[\p{L}\p{M}\p{N} .&-]{2,60}$/u.test(body.against)) errs.against = 'grievance.form.againstInvalid';
     if (body.issue === 'other' && (body.issueOther || '').length < 3) errs.issueOther = 'grievance.form.issueOtherRequired';
     if (!body.incidentDate || body.incidentDate > todayLocal()) errs.incidentDate = 'grievance.form.dateRequired';
     if (body.endDate && body.incidentDate && body.endDate < body.incidentDate) errs.endDate = 'grievance.form.endBeforeStart';
@@ -718,7 +721,7 @@
         const blob = new Blob([text], { type: 'text/plain' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = t('grievance.downloadFileName', { date: new Date().toISOString().slice(0, 10) });
+        a.download = t('grievance.downloadFileName', { date: todayLocal() });
         a.click();
       });
     } catch (err) {

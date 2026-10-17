@@ -1,6 +1,6 @@
 // The ONE shared Gemini helper. All routes call gemini(); nothing else talks to the API.
 // GEMINI_API_KEY is read from the environment only and is sent solely in the request header, never to the client.
-import { languageInstruction, normalizeDeep, isTargetScript } from './lang.js';
+import { languageInstruction, normalizeDeep, isTargetScript, foreignIndicCount } from './lang.js';
 import { AppError } from '../http/errors.js';
 import { logger } from './logger.js';
 import { MODEL, MAX_TOKENS_CEILING } from '../config.js';
@@ -64,7 +64,14 @@ export function createGemini({
         continue;
       }
       const norm = normalizeDeep(json, lang);
-      if (isTargetScript(norm, lang)) return norm;
+      if (isTargetScript(norm, lang)) {
+        // Mixed-script words (letters with no equivalent in the target script) get one clean retry; the retry is kept as-is.
+        if (attempt === 0 && foreignIndicCount(norm, lang) > 0) {
+          logger.warn('gemini_mixed_script', { lang });
+          continue;
+        }
+        return norm;
+      }
       wrongLang = true;
       logger.warn('gemini_wrong_script', { lang, attempt: attempt + 1 });
     }
