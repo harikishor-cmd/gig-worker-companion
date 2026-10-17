@@ -34,17 +34,44 @@ describe('computeWeekStats', () => {
     ];
     const s = computeWeekStats(entries, '2026-10-12');
     expect(s.week).toEqual({ start: '2026-10-12', end: '2026-10-18' });
-    expect(s.totals).toMatchObject({ net: 1900, gross: 2200, tips: 50, expenses: 350, hours: 11, trips: 20, daysWorked: 2, perHour: 172.73, perTrip: 95, nightSharePct: 53 });
+    expect(s.totals).toMatchObject({
+      net: 1900,
+      gross: 2200,
+      tips: 50,
+      expenses: 350,
+      hours: 11,
+      trips: 20,
+      daysWorked: 2,
+      perHour: 172.73,
+      perTrip: 95,
+      nightSharePct: 53,
+    });
     expect(s.bestDay).toBe('2026-10-13');
     expect(s.prevWeek).toEqual({ net: 800, perHour: 200 });
     expect(s.deltaNetPct).toBe(138);
   });
 
   it('drops model insights that mention numbers not in the stats', async () => {
-    const { app } = makeApp({ geminiResult: { headline: 'You earned ₹1,900 this week', insights: [{ text: 'Your net was ₹1,900', basis: 'totals.net' }, { text: 'Riders in your city make ₹25,000', basis: 'totals.net' }], suggestions: [] } });
-    const res = await request(app).post('/api/summary').send({ lang: 'en', weekStart: '2026-10-12', entries: [
-      e({ date: '2026-10-12', gross: 1000, tips: 50, expenses: 150 }), e({ date: '2026-10-13', gross: 1200, expenses: 200, shift: 'night' }),
-    ] });
+    const { app } = makeApp({
+      geminiResult: {
+        headline: 'You earned ₹1,900 this week',
+        insights: [
+          { text: 'Your net was ₹1,900', basis: 'totals.net' },
+          { text: 'Riders in your city make ₹25,000', basis: 'totals.net' },
+        ],
+        suggestions: [],
+      },
+    });
+    const res = await request(app)
+      .post('/api/summary')
+      .send({
+        lang: 'en',
+        weekStart: '2026-10-12',
+        entries: [
+          e({ date: '2026-10-12', gross: 1000, tips: 50, expenses: 150 }),
+          e({ date: '2026-10-13', gross: 1200, expenses: 200, shift: 'night' }),
+        ],
+      });
     expect(res.status).toBe(200);
     expect(res.body.data.ai.headline).toContain('1,900');
     expect(res.body.data.ai.insights).toHaveLength(1);

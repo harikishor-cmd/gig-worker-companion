@@ -17,12 +17,26 @@ export const SUMMARY_SCHEMA = {
   properties: {
     headline: { type: 'string' },
     insights: {
-      type: 'array', maxItems: 3,
+      type: 'array',
+      maxItems: 3,
       items: {
-        type: 'object', required: ['text', 'basis'],
+        type: 'object',
+        required: ['text', 'basis'],
         properties: {
           text: { type: 'string' },
-          basis: { type: 'string', enum: ['totals.net', 'totals.perHour', 'totals.perTrip', 'totals.expenseShare', 'totals.nightSharePct', 'byPlatform', 'byDay', 'prevWeek'] },
+          basis: {
+            type: 'string',
+            enum: [
+              'totals.net',
+              'totals.perHour',
+              'totals.perTrip',
+              'totals.expenseShare',
+              'totals.nightSharePct',
+              'byPlatform',
+              'byDay',
+              'prevWeek',
+            ],
+          },
         },
       },
     },

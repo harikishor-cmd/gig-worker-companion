@@ -23,6 +23,9 @@ export const DOCUMENT_SCHEMA = {
     amounts: { type: 'array', items: { type: 'object', properties: { label: { type: 'string' }, value: { type: 'string' } } } },
     actions: { type: 'array', maxItems: 5, items: { type: 'string' } },
     unclear: { type: 'array', items: { type: 'string' } },
-    grievance_hint: { type: 'object', properties: { suggested: { type: 'boolean' }, issue: { type: 'string' }, platform: { type: 'string' }, details: { type: 'string' } } },
+    grievance_hint: {
+      type: 'object',
+      properties: { suggested: { type: 'boolean' }, issue: { type: 'string' }, platform: { type: 'string' }, details: { type: 'string' } },
+    },
   },
 };

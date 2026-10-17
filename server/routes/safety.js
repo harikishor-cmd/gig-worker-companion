@@ -25,7 +25,11 @@ export function riskFloor({ vehicle, shift, situations }) {
   if (twoWheels && s.has('rain_fog')) return 'moderate';
   return 'low';
 }
-const stripPhones = (t) => String(t).replace(/\+?\d[\d\s-]{2,}\d/g, '').replace(/\s{2,}/g, ' ').trim();
+const stripPhones = (t) =>
+  String(t)
+    .replace(/\+?\d[\d\s-]{2,}\d/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 
 export default function safetyRouter({ gemini, cache }) {
   const r = Router();
@@ -36,13 +40,22 @@ export default function safetyRouter({ gemini, cache }) {
     const key = cache.key({ f: 'B', input, lang });
     let guidance = cache.get(key);
     if (!guidance) {
-      const raw = await gemini({ lang, system: SAFETY_SYSTEM, prompt: wrap('input', input), schema: SAFETY_SCHEMA, temperature: 0.3, maxOutputTokens: TOKEN_LIMITS.safety });
+      const raw = await gemini({
+        lang,
+        system: SAFETY_SYSTEM,
+        prompt: wrap('input', input),
+        schema: SAFETY_SCHEMA,
+        temperature: 0.3,
+        maxOutputTokens: TOKEN_LIMITS.safety,
+      });
       const floor = riskFloor(input);
       const model = LEVELS.includes(raw.riskLevel) ? raw.riskLevel : floor;
       guidance = {
         riskLevel: LEVELS.indexOf(model) >= LEVELS.indexOf(floor) ? model : floor,
         riskReason: raw.riskReason ? stripPhones(raw.riskReason).slice(0, 240) : null,
-        tips: (raw.tips || []).slice(0, 6).map((t) => ({ title: stripPhones(t.title).slice(0, 80), detail: stripPhones(t.detail).slice(0, 260) })),
+        tips: (raw.tips || [])
+          .slice(0, 6)
+          .map((t) => ({ title: stripPhones(t.title).slice(0, 80), detail: stripPhones(t.detail).slice(0, 260) })),
         checklist: (raw.checklist || []).slice(0, 5).map((c) => stripPhones(c).slice(0, 100)),
       };
       cache.set(key, guidance);

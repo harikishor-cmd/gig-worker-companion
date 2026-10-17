@@ -21,13 +21,38 @@ export function joinGrievanceBody(rawBody, workerName) {
   const paras = (Array.isArray(rawBody) ? rawBody : [rawBody]).map((p) => String(p ?? '').trim()).filter(Boolean);
   let body = paras.join('\n\n');
   const name = String(workerName || '').trim();
-  if (name) body = body.replace(/\[\s*(?:(?:your\s+)?(?:full\s+)?name|(?:आपका\s+)?(?:पूरा\s+)?नाम|(?:ਤੁਹਾਡਾ\s+)?(?:ਪੂਰਾ\s+)?(?:ਨਾਮ|ਨਾਂ))\s*\]/giu, name);
+  if (name)
+    body = body.replace(
+      /\[\s*(?:(?:your\s+)?(?:full\s+)?name|(?:आपका\s+)?(?:पूरा\s+)?नाम|(?:ਤੁਹਾਡਾ\s+)?(?:ਪੂਰਾ\s+)?(?:ਨਾਮ|ਨਾਂ))\s*\]/giu,
+      name,
+    );
   return body.slice(0, 6000);
 }
 
 export function buildFacts(v, today) {
-  const evidence = v.evidence.map((e) => ({ date: e.date, platform: e.platform, gross: e.gross, tips: e.tips, expenses: e.expenses, hours: e.hours, trips: e.trips }));
-  const facts = { today, against: v.against, issue: v.issue, issueOther: v.issueOther, incidentDate: v.incidentDate, endDate: v.endDate, details: v.details, desiredOutcome: v.desiredOutcome, workerName: v.workerName, workerId: v.workerId, amount: v.amount, evidence };
+  const evidence = v.evidence.map((e) => ({
+    date: e.date,
+    platform: e.platform,
+    gross: e.gross,
+    tips: e.tips,
+    expenses: e.expenses,
+    hours: e.hours,
+    trips: e.trips,
+  }));
+  const facts = {
+    today,
+    against: v.against,
+    issue: v.issue,
+    issueOther: v.issueOther,
+    incidentDate: v.incidentDate,
+    endDate: v.endDate,
+    details: v.details,
+    desiredOutcome: v.desiredOutcome,
+    workerName: v.workerName,
+    workerId: v.workerId,
+    amount: v.amount,
+    evidence,
+  };
   return Object.fromEntries(Object.entries(facts).filter(([, x]) => x !== undefined && x !== ''));
 }
 
@@ -36,8 +61,17 @@ export default function grievanceRouter({ gemini }) {
   r.post('/', validate(schemas.grievance), async (req, res) => {
     const v = req.valid;
     const facts = buildFacts(v, new Date().toISOString().slice(0, 10));
-    const raw = await gemini({ lang: v.lang, system: GRIEVANCE_SYSTEM, prompt: wrap('facts', facts), schema: GRIEVANCE_SCHEMA, temperature: 0.3, maxOutputTokens: TOKEN_LIMITS.grievance });
-    const subject = String(raw.subject || '').trim().slice(0, 200);
+    const raw = await gemini({
+      lang: v.lang,
+      system: GRIEVANCE_SYSTEM,
+      prompt: wrap('facts', facts),
+      schema: GRIEVANCE_SCHEMA,
+      temperature: 0.3,
+      maxOutputTokens: TOKEN_LIMITS.grievance,
+    });
+    const subject = String(raw.subject || '')
+      .trim()
+      .slice(0, 200);
     const body = joinGrievanceBody(raw.body, v.workerName);
     if (!subject || !body) throw new AppError(502, 'model_bad_output', { message: 'empty draft' });
     // Log (not block) rupee amounts in the draft that don't appear in the submitted facts.

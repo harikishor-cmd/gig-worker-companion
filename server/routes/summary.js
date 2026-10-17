@@ -16,19 +16,32 @@ export default function summaryRouter({ gemini, cache }) {
     const { lang, weekStart, entries } = req.valid;
     const stats = computeWeekStats(entries, weekStart);
     // Low-data gate: no model call when there is nothing real to say.
-    if (stats.totals.daysWorked < 2) return ok(res, { stats, ai: null, reason: stats.totals.daysWorked === 0 ? 'no_entries' : 'not_enough_days' });
+    if (stats.totals.daysWorked < 2)
+      return ok(res, { stats, ai: null, reason: stats.totals.daysWorked === 0 ? 'no_entries' : 'not_enough_days' });
 
     const key = cache.key({ f: 'A', stats, lang });
     let ai = cache.get(key);
     if (!ai) {
-      const raw = await gemini({ lang, system: SUMMARY_SYSTEM, prompt: wrap('input', stats), schema: SUMMARY_SCHEMA, temperature: 0.3, maxOutputTokens: TOKEN_LIMITS.summary });
+      const raw = await gemini({
+        lang,
+        system: SUMMARY_SYSTEM,
+        prompt: wrap('input', stats),
+        schema: SUMMARY_SCHEMA,
+        temperature: 0.3,
+        maxOutputTokens: TOKEN_LIMITS.summary,
+      });
       const allowed = allowedNumbers(stats);
       ai = {
         // Anti-hallucination post-check: drop any text that mentions a number not in the stats.
         headline: typeof raw.headline === 'string' && onlyKnownNumbers(raw.headline, allowed) ? raw.headline.slice(0, 200) : null,
-        insights: (raw.insights || []).filter((i) => typeof i?.text === 'string' && onlyKnownNumbers(i.text, allowed)).slice(0, 3)
+        insights: (raw.insights || [])
+          .filter((i) => typeof i?.text === 'string' && onlyKnownNumbers(i.text, allowed))
+          .slice(0, 3)
           .map((i) => ({ text: i.text.slice(0, 260), basis: i.basis })),
-        suggestions: (raw.suggestions || []).filter((s) => typeof s === 'string' && onlyKnownNumbers(s, allowed)).slice(0, 2).map((s) => s.slice(0, 220)),
+        suggestions: (raw.suggestions || [])
+          .filter((s) => typeof s === 'string' && onlyKnownNumbers(s, allowed))
+          .slice(0, 2)
+          .map((s) => s.slice(0, 220)),
       };
       cache.set(key, ai);
     }

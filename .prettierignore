@@ -1,0 +1,8 @@
+node_modules
+package-lock.json
+server/data
+web/data
+web/i18n
+submission
+*.md
+*.html

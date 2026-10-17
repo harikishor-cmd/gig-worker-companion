@@ -6,7 +6,7 @@
   let lang = localStorage.getItem(LS_LANG) || 'en';
   if (!SUPPORTED.includes(lang)) lang = 'en';
   let i18n = {};
-  let entries = loadEntries();
+  const entries = loadEntries();
   let pendingImage = null; // { mimeType, imageBase64 }
 
   const $ = (sel, el = document) => el.querySelector(sel);
@@ -17,14 +17,16 @@
     let v = i18n;
     for (const p of parts) v = v && v[p];
     if (typeof v !== 'string') return path;
-    return v.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? String(vars[k]) : `{${k}}`));
+    return v.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined && vars[k] !== null ? String(vars[k]) : `{${k}}`));
   }
 
   function loadEntries() {
     try {
       const raw = JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]');
       return Array.isArray(raw) ? raw : [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }
   function saveEntries() {
     localStorage.setItem(LS_ENTRIES, JSON.stringify(entries));
@@ -41,8 +43,16 @@
     $('#app-name').textContent = t('app.name');
     $('#app-tagline').textContent = t('app.tagline');
     $('#lang-select').value = lang;
-    const navMap = { earnings: 'nav.earnings', safety: 'nav.safety', schemes: 'nav.schemes', document: 'nav.document', grievance: 'nav.grievance' };
-    $$('.tab').forEach((btn) => { btn.textContent = t(navMap[btn.dataset.tab]); });
+    const navMap = {
+      earnings: 'nav.earnings',
+      safety: 'nav.safety',
+      schemes: 'nav.schemes',
+      document: 'nav.document',
+      grievance: 'nav.grievance',
+    };
+    $$('.tab').forEach((btn) => {
+      btn.textContent = t(navMap[btn.dataset.tab]);
+    });
     $('#earnings-title').textContent = t('earnings.title');
     $('#earnings-storage').textContent = t('earnings.storageNote');
     $('#earnings-add-label').textContent = t('earnings.addButton');
@@ -73,9 +83,14 @@
   let schemesRequested = false;
   function setTab(name) {
     $$('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
-    $$('.panel').forEach((p) => { p.hidden = p.dataset.panel !== name; });
+    $$('.panel').forEach((p) => {
+      p.hidden = p.dataset.panel !== name;
+    });
     // Lazy-load the curated schemes list the first time its tab opens (keeps first load small).
-    if (name === 'schemes' && !schemesRequested) { schemesRequested = true; loadSchemes(); }
+    if (name === 'schemes' && !schemesRequested) {
+      schemesRequested = true;
+      loadSchemes();
+    }
   }
 
   function showLoading(msg) {
@@ -83,7 +98,9 @@
     $('#loading-text').textContent = msg || t('common.loading');
     el.hidden = false;
   }
-  function hideLoading() { $('#loading').hidden = true; }
+  function hideLoading() {
+    $('#loading').hidden = true;
+  }
 
   // Server error codes -> i18n keys (+ placeholder values). Unknown codes fall back to server_error.
   const ERROR_ALIASES = {
@@ -97,7 +114,8 @@
   function showError(boxId, code, retryFn, info = {}) {
     const box = $(boxId);
     const mapped = ERROR_ALIASES[code] || code;
-    const key = mapped && i18n.error && i18n.error[mapped] ? `error.${mapped}` : (code === 'network' ? 'error.network' : 'error.server_error');
+    const key =
+      mapped && i18n.error && i18n.error[mapped] ? `error.${mapped}` : code === 'network' ? 'error.network' : 'error.server_error';
     let msg = t(key, { maxMb: 4, seconds: info.retryAfter || 60 });
     if (msg === key) msg = t('error.server_error');
     box.innerHTML = '';
@@ -109,12 +127,21 @@
       btn.type = 'button';
       btn.className = 'btn secondary tap';
       btn.textContent = t('common.retry');
-      btn.addEventListener('click', () => { box.hidden = true; retryFn(); });
+      btn.addEventListener('click', () => {
+        box.hidden = true;
+        retryFn();
+      });
       box.appendChild(btn);
     }
     box.hidden = false;
   }
-  function clearError(boxId) { const b = $(boxId); if (b) { b.hidden = true; b.innerHTML = ''; } }
+  function clearError(boxId) {
+    const b = $(boxId);
+    if (b) {
+      b.hidden = true;
+      b.innerHTML = '';
+    }
+  }
 
   /**
    * Wrap an async action so a second tap is ignored while one request is in flight
@@ -127,10 +154,18 @@
       busy = true;
       const btn = $(btnSel);
       const wasDisabled = btn ? btn.disabled : false;
-      if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
-      try { await fn(); } finally {
+      if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+      }
+      try {
+        await fn();
+      } finally {
         busy = false;
-        if (btn) { btn.disabled = wasDisabled; btn.removeAttribute('aria-busy'); }
+        if (btn) {
+          btn.disabled = wasDisabled;
+          btn.removeAttribute('aria-busy');
+        }
       }
     };
   }
@@ -142,7 +177,13 @@
       body: JSON.stringify(body),
     });
     let json;
-    try { json = await res.json(); } catch { const e = new Error('network'); e.code = 'network'; throw e; }
+    try {
+      json = await res.json();
+    } catch {
+      const e = new Error('network');
+      e.code = 'network';
+      throw e;
+    }
     if (!json.ok) {
       const e = new Error(json.error?.code || 'server_error');
       e.code = json.error?.code || 'server_error';
@@ -150,7 +191,7 @@
       if (res.status === 429) {
         const ra = Number(res.headers.get('retry-after'));
         const m = /t=(\d+)/.exec(res.headers.get('ratelimit') || '');
-        e.retryAfter = ra > 0 ? ra : (m ? Number(m[1]) : 60);
+        e.retryAfter = ra > 0 ? ra : m ? Number(m[1]) : 60;
       }
       throw e;
     }
@@ -164,7 +205,9 @@
     return x.toISOString().slice(0, 10);
   }
 
-  function netOf(e) { return (Number(e.gross) || 0) + (Number(e.tips) || 0) - (Number(e.expenses) || 0); }
+  function netOf(e) {
+    return (Number(e.gross) || 0) + (Number(e.tips) || 0) - (Number(e.expenses) || 0);
+  }
 
   function weekEntries() {
     const start = mondayOf();
@@ -178,12 +221,16 @@
     const list = $('#earnings-list');
     list.innerHTML = '';
     const week = weekEntries().sort((a, b) => b.date.localeCompare(a.date));
-    let totalNet = 0, totalHours = 0;
-    week.forEach((e) => { totalNet += netOf(e); totalHours += Number(e.hours) || 0; });
+    let totalNet = 0,
+      totalHours = 0;
+    week.forEach((e) => {
+      totalNet += netOf(e);
+      totalHours += Number(e.hours) || 0;
+    });
     $('#earnings-totals').innerHTML = week.length
       ? `<p><strong>₹${Math.round(totalNet)}</strong> · ${totalHours.toFixed(1)} h · ${week.length} entries</p><p class="hint">${t('earnings.stats.computedNote')}</p>`
       : `<p>${t('earnings.empty.title')}</p><p class="hint">${t('earnings.empty.body')}</p>`;
-    week.forEach((e, idx) => {
+    week.forEach((e) => {
       const li = document.createElement('li');
       const net = netOf(e);
       const label = document.createElement('span');
@@ -214,19 +261,23 @@
       box.textContent = t('grievance.form.evidenceNone');
       return;
     }
-    entries.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 31).forEach((e, i) => {
-      const id = `ev-${i}-${e.date}`;
-      const wrap = document.createElement('label');
-      wrap.className = 'evidence-item';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = String(entries.indexOf(e));
-      cb.id = id;
-      const span = document.createElement('span');
-      span.textContent = `${e.date} ${e.platform} ₹${netOf(e)}`;
-      wrap.append(cb, span);
-      box.appendChild(wrap);
-    });
+    entries
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 31)
+      .forEach((e, i) => {
+        const id = `ev-${i}-${e.date}`;
+        const wrap = document.createElement('label');
+        wrap.className = 'evidence-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = String(entries.indexOf(e));
+        cb.id = id;
+        const span = document.createElement('span');
+        span.textContent = `${e.date} ${e.platform} ₹${netOf(e)}`;
+        wrap.append(cb, span);
+        box.appendChild(wrap);
+      });
   }
 
   // ---- Earnings form ----
@@ -277,19 +328,25 @@
         if (data.ai.headline) html += `<p><strong>${escapeHtml(data.ai.headline)}</strong></p>`;
         if (data.ai.insights?.length) {
           html += `<h4>${t('earnings.summary.insightsTitle')}</h4><ul>`;
-          data.ai.insights.forEach((i) => { html += `<li>${escapeHtml(i.text)}</li>`; });
+          data.ai.insights.forEach((i) => {
+            html += `<li>${escapeHtml(i.text)}</li>`;
+          });
           html += '</ul>';
         }
         if (data.ai.suggestions?.length) {
           html += '<ul>';
-          data.ai.suggestions.forEach((s) => { html += `<li>${escapeHtml(s)}</li>`; });
+          data.ai.suggestions.forEach((s) => {
+            html += `<li>${escapeHtml(s)}</li>`;
+          });
           html += '</ul>';
         }
       }
       box.innerHTML = html;
     } catch (err) {
       showError('#summary-error', err.code || 'network', runSummary, err);
-    } finally { hideLoading(); }
+    } finally {
+      hideLoading();
+    }
   }
   const runSummary = singleFlight('#summary-btn', runSummaryOnce);
   $('#summary-btn').addEventListener('click', runSummary);
@@ -316,21 +373,30 @@
       html += `<p class="risk-${g.riskLevel || 'low'}"><strong>${escapeHtml(g.riskLevel || '')}</strong>${g.riskReason ? ' — ' + escapeHtml(g.riskReason) : ''}</p>`;
       if (g.tips?.length) {
         html += '<ul>';
-        g.tips.forEach((tip) => { html += `<li><strong>${escapeHtml(tip.title)}</strong>: ${escapeHtml(tip.detail)}</li>`; });
+        g.tips.forEach((tip) => {
+          html += `<li><strong>${escapeHtml(tip.title)}</strong>: ${escapeHtml(tip.detail)}</li>`;
+        });
         html += '</ul>';
       }
       if (g.checklist?.length) {
         html += '<h4>Checklist</h4><ul>';
-        g.checklist.forEach((c) => { html += `<li>${escapeHtml(c)}</li>`; });
+        g.checklist.forEach((c) => {
+          html += `<li>${escapeHtml(c)}</li>`;
+        });
         html += '</ul>';
       }
       box.innerHTML = html;
     } catch (err) {
       showError('#safety-error', err.code || 'network', runSafety, err);
-    } finally { hideLoading(); }
+    } finally {
+      hideLoading();
+    }
   }
   const runSafety = singleFlight('#safety-submit', runSafetyOnce);
-  $('#safety-form').addEventListener('submit', (e) => { e.preventDefault(); runSafety(); });
+  $('#safety-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    runSafety();
+  });
 
   // ---- Schemes ----
   async function loadSchemes() {
@@ -338,7 +404,7 @@
     try {
       const res = await fetch('/data/schemes.json');
       const data = await res.json();
-      const schemes = Array.isArray(data) ? data : (data.schemes || []);
+      const schemes = Array.isArray(data) ? data : data.schemes || [];
       const verified = data.last_verified || '';
       $('#schemes-intro').textContent = t('schemes.intro', { date: verified });
       list.innerHTML = '';
@@ -379,15 +445,21 @@
       if (!data.found) html += `<p>${t('schemes.ask.notFound')}</p>`;
       else {
         html += `<p>${escapeHtml(data.answer || '')}</p>`;
-        if (data.cited_scheme_ids?.length) html += `<p class="hint">${t('schemes.ask.citedFrom', { schemes: data.cited_scheme_ids.join(', ') })}</p>`;
+        if (data.cited_scheme_ids?.length)
+          html += `<p class="hint">${t('schemes.ask.citedFrom', { schemes: data.cited_scheme_ids.join(', ') })}</p>`;
       }
       box.innerHTML = html;
     } catch (err) {
       showError('#schemes-error', err.code || 'network', runSchemesAsk, err);
-    } finally { hideLoading(); }
+    } finally {
+      hideLoading();
+    }
   }
   const runSchemesAsk = singleFlight('#schemes-submit', runSchemesAskOnce);
-  $('#schemes-form').addEventListener('submit', (e) => { e.preventDefault(); runSchemesAsk(); });
+  $('#schemes-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    runSchemesAsk();
+  });
 
   // ---- Document (resize client-side) ----
   function resizeImage(file, max = 1600) {
@@ -400,21 +472,26 @@
         width = Math.round(width * scale);
         height = Math.round(height * scale);
         const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
-        canvas.toBlob((blob) => {
-          if (!blob) return reject(new Error('blob'));
-          const reader = new FileReader();
-          reader.onload = () => {
-            const dataUrl = reader.result;
-            const b64 = dataUrl.split(',')[1];
-            resolve({ mimeType: 'image/jpeg', imageBase64: b64, preview: dataUrl });
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        }, 'image/jpeg', 0.85);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error('blob'));
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = reader.result;
+              const b64 = dataUrl.split(',')[1];
+              resolve({ mimeType: 'image/jpeg', imageBase64: b64, preview: dataUrl });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          },
+          'image/jpeg',
+          0.85,
+        );
       };
       img.onerror = reject;
       img.src = url;
@@ -457,12 +534,16 @@
         html += `<p>${escapeHtml(data.summary || '')}</p>`;
         if (data.actions?.length) {
           html += `<h4>${t('documents.result.whatToDo')}</h4><ul>`;
-          data.actions.forEach((a) => { html += `<li>${escapeHtml(a)}</li>`; });
+          data.actions.forEach((a) => {
+            html += `<li>${escapeHtml(a)}</li>`;
+          });
           html += '</ul>';
         }
         if (data.unclear?.length) {
           html += '<ul>';
-          data.unclear.forEach((u) => { html += `<li>${escapeHtml(u)}</li>`; });
+          data.unclear.forEach((u) => {
+            html += `<li>${escapeHtml(u)}</li>`;
+          });
           html += '</ul>';
         }
         if (data.grievance_hint?.suggested) {
@@ -471,22 +552,30 @@
       }
       box.innerHTML = html;
       const chip = $('#to-grievance-chip');
-      if (chip) chip.addEventListener('click', () => {
-        setTab('grievance');
-        if (data.grievance_hint?.details) {
-          const f = $('#grievance-form');
-          if (data.grievance_hint.issue) {/* leave issue as-is */}
-          f.details.value = data.grievance_hint.details;
-          if (data.grievance_hint.platform) f.against.value = data.grievance_hint.platform;
-        }
-      });
+      if (chip)
+        chip.addEventListener('click', () => {
+          setTab('grievance');
+          if (data.grievance_hint?.details) {
+            const f = $('#grievance-form');
+            if (data.grievance_hint.issue) {
+              /* leave issue as-is */
+            }
+            f.details.value = data.grievance_hint.details;
+            if (data.grievance_hint.platform) f.against.value = data.grievance_hint.platform;
+          }
+        });
     } catch (err) {
-      const code = err.code === 'unsupported_image' ? 'unsupported_media_type' : (err.code || 'network');
+      const code = err.code === 'unsupported_image' ? 'unsupported_media_type' : err.code || 'network';
       showError('#document-error', code, runDocument, err);
-    } finally { hideLoading(); }
+    } finally {
+      hideLoading();
+    }
   }
   const runDocument = singleFlight('#document-submit', runDocumentOnce);
-  $('#document-form').addEventListener('submit', (e) => { e.preventDefault(); runDocument(); });
+  $('#document-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    runDocument();
+  });
 
   // ---- Grievance ----
   $('#grievance-form').issue.addEventListener('change', (e) => {
@@ -498,7 +587,9 @@
     clearError('#grievance-error');
     const form = $('#grievance-form');
     const fd = new FormData(form);
-    const evidence = $$('#grievance-evidence input:checked').map((cb) => entries[Number(cb.value)]).filter(Boolean);
+    const evidence = $$('#grievance-evidence input:checked')
+      .map((cb) => entries[Number(cb.value)])
+      .filter(Boolean);
     const body = {
       lang,
       against: String(fd.get('against') || '').trim(),
@@ -525,12 +616,19 @@
       html += `<button type="button" class="btn secondary tap" id="dl-draft">${t('grievance.download')}</button>`;
       if (data.channels?.length) {
         html += `<h4>${t('grievance.channels.title')}</h4><ul>`;
-        data.channels.forEach((c) => { html += `<li>${escapeHtml(c.label)}: ${escapeHtml(c.value)}</li>`; });
+        data.channels.forEach((c) => {
+          html += `<li>${escapeHtml(c.label)}: ${escapeHtml(c.value)}</li>`;
+        });
         html += '</ul>';
       }
       box.innerHTML = html;
       $('#copy-draft').addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(text); $('#copy-draft').textContent = t('grievance.copied'); } catch { /* ignore */ }
+        try {
+          await navigator.clipboard.writeText(text);
+          $('#copy-draft').textContent = t('grievance.copied');
+        } catch {
+          /* ignore */
+        }
       });
       $('#dl-draft').addEventListener('click', () => {
         const blob = new Blob([text], { type: 'text/plain' });
@@ -541,13 +639,18 @@
       });
     } catch (err) {
       showError('#grievance-error', err.code || 'network', runGrievance, err);
-    } finally { hideLoading(); }
+    } finally {
+      hideLoading();
+    }
   }
   const runGrievance = singleFlight('#grievance-submit', runGrievanceOnce);
-  $('#grievance-form').addEventListener('submit', (e) => { e.preventDefault(); runGrievance(); });
+  $('#grievance-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    runGrievance();
+  });
 
   function escapeHtml(s) {
-    return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
   // ---- Lang + tabs + boot ----
@@ -563,7 +666,11 @@
     try {
       await loadI18n(lang);
     } catch {
-      i18n = { app: { name: 'Gig Saathi', tagline: '' }, common: { loading: 'Please wait…', retry: 'Try again', save: 'Save', delete: 'Delete', aiNote: 'Written by Gemini AI.' }, error: { server_error: 'Something went wrong.', network: 'Could not connect.' } };
+      i18n = {
+        app: { name: 'Gig Saathi', tagline: '' },
+        common: { loading: 'Please wait…', retry: 'Try again', save: 'Save', delete: 'Delete', aiNote: 'Written by Gemini AI.' },
+        error: { server_error: 'Something went wrong.', network: 'Could not connect.' },
+      };
     }
     applyI18n();
     const today = new Date().toISOString().slice(0, 10);

@@ -17,7 +17,12 @@ export const SAFETY_SCHEMA = {
   properties: {
     riskLevel: { type: 'string', enum: ['low', 'moderate', 'high'] },
     riskReason: { type: 'string' },
-    tips: { type: 'array', minItems: 3, maxItems: 6, items: { type: 'object', required: ['title', 'detail'], properties: { title: { type: 'string' }, detail: { type: 'string' } } } },
+    tips: {
+      type: 'array',
+      minItems: 3,
+      maxItems: 6,
+      items: { type: 'object', required: ['title', 'detail'], properties: { title: { type: 'string' }, detail: { type: 'string' } } },
+    },
     checklist: { type: 'array', maxItems: 5, items: { type: 'string' } },
   },
 };

@@ -9,25 +9,42 @@ function addDays(iso, n) {
 }
 
 function aggregate(entries) {
-  let gross = 0, tips = 0, expenses = 0, hours = 0, trips = 0, nightNet = 0;
+  let gross = 0,
+    tips = 0,
+    expenses = 0,
+    hours = 0,
+    trips = 0,
+    nightNet = 0;
   const byDay = new Map();
   const byPlatform = new Map();
   for (const e of entries) {
     const net = r2(e.gross + (e.tips || 0) - (e.expenses || 0));
-    gross = r2(gross + e.gross); tips = r2(tips + (e.tips || 0)); expenses = r2(expenses + (e.expenses || 0));
-    hours = r2(hours + e.hours); trips += e.trips || 0;
+    gross = r2(gross + e.gross);
+    tips = r2(tips + (e.tips || 0));
+    expenses = r2(expenses + (e.expenses || 0));
+    hours = r2(hours + e.hours);
+    trips += e.trips || 0;
     if (e.shift === 'night') nightNet = r2(nightNet + net);
     const d = byDay.get(e.date) || { date: e.date, net: 0, hours: 0 };
-    d.net = r2(d.net + net); d.hours = r2(d.hours + e.hours); byDay.set(e.date, d);
+    d.net = r2(d.net + net);
+    d.hours = r2(d.hours + e.hours);
+    byDay.set(e.date, d);
     const p = byPlatform.get(e.platform) || { platform: e.platform, net: 0, hours: 0 };
-    p.net = r2(p.net + net); p.hours = r2(p.hours + e.hours); byPlatform.set(e.platform, p);
+    p.net = r2(p.net + net);
+    p.hours = r2(p.hours + e.hours);
+    byPlatform.set(e.platform, p);
   }
   const net = r2(gross + tips - expenses);
   const days = [...byDay.values()].sort((a, b) => a.date.localeCompare(b.date));
   const best = days.length >= 2 ? days.reduce((a, b) => (b.net > a.net ? b : a)) : null;
   return {
     totals: {
-      net, gross, tips, expenses, hours, trips,
+      net,
+      gross,
+      tips,
+      expenses,
+      hours,
+      trips,
       daysWorked: days.length,
       perHour: div(net, hours),
       perTrip: div(net, trips),
@@ -79,6 +96,6 @@ export function allowedNumbers(stats) {
 export function numbersIn(text) {
   const norm = text
     .replace(/[\u0966-\u096F]/g, (c) => String(c.charCodeAt(0) - 0x0966))
-    .replace(/[\u0A66-\u0A6F]/g, (c) => String(c.charCodeAt(0) - 0x0A66));
+    .replace(/[\u0A66-\u0A6F]/g, (c) => String(c.charCodeAt(0) - 0x0a66));
   return (norm.match(/\d[\d,]*(?:\.\d+)?/g) || []).map((n) => String(Number(n.replace(/,/g, ''))));
 }

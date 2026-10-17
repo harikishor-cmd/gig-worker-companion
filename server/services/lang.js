@@ -41,7 +41,10 @@ export function normalizeScript(text, lang) {
       if (base !== undefined && base !== tgt.base) {
         const mapped = String.fromCodePoint(tgt.base + (cp - base));
         // Keep the original if the target slot is unassigned; shared marks (danda U+0964/5) are Common and stay as-is.
-        if (tgt.re.test(mapped)) { out += mapped; continue; }
+        if (tgt.re.test(mapped)) {
+          out += mapped;
+          continue;
+        }
       }
     }
     out += ch;

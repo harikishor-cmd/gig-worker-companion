@@ -39,7 +39,14 @@ export default function schemesRouter({ gemini, getSchemes, cache }) {
     if (hit) return ok(res, hit);
 
     const prompt = `<schemes>${memo.json}</schemes>\n${wrap('profile', profile)}\n${wrap('question', question)}`;
-    const raw = await gemini({ lang, system: SCHEMES_SYSTEM, prompt, schema: SCHEMES_SCHEMA, temperature: 0.2, maxOutputTokens: TOKEN_LIMITS.schemes });
+    const raw = await gemini({
+      lang,
+      system: SCHEMES_SYSTEM,
+      prompt,
+      schema: SCHEMES_SCHEMA,
+      temperature: 0.2,
+      maxOutputTokens: TOKEN_LIMITS.schemes,
+    });
     const known = new Set(schemesList.map((s) => s.id));
     // Server drops any cited id that is not in schemes.json.
     const cited = [...new Set((raw.cited_scheme_ids || []).filter((id) => known.has(id)))];

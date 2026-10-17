@@ -3,11 +3,17 @@ import request from 'supertest';
 import { makeApp } from './helpers.js';
 
 // Test-only fixture ids; real data lives in server/data/schemes.json (curated by PW Schemes & Grounding).
-const FIXTURE = [{ id: 'fixture_a', name: 'Fixture A' }, { id: 'fixture_b', name: 'Fixture B' }];
+const FIXTURE = [
+  { id: 'fixture_a', name: 'Fixture A' },
+  { id: 'fixture_b', name: 'Fixture B' },
+];
 
 describe('POST /api/schemes/ask grounding', () => {
   it('strips cited ids not in schemes.json', async () => {
-    const { app } = makeApp({ schemes: FIXTURE, geminiResult: { answer: 'Yes, via Fixture A.', cited_scheme_ids: ['fixture_a', 'invented_scheme'], found: true } });
+    const { app } = makeApp({
+      schemes: FIXTURE,
+      geminiResult: { answer: 'Yes, via Fixture A.', cited_scheme_ids: ['fixture_a', 'invented_scheme'], found: true },
+    });
     const res = await request(app).post('/api/schemes/ask').send({ lang: 'hi', question: 'Am I eligible?' });
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual({ answer: 'Yes, via Fixture A.', cited_scheme_ids: ['fixture_a'], found: true });

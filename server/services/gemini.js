@@ -30,7 +30,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  * @property {number} [temperature] clamped to <= 0.4
  * @property {number} [maxOutputTokens] per-route cap from config.TOKEN_LIMITS
  */
-export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODEL, fetchImpl = globalThis.fetch, retryDelayMs = 1200 } = {}) {
+export function createGemini({
+  apiKey = process.env.GEMINI_API_KEY,
+  model = MODEL,
+  fetchImpl = globalThis.fetch,
+  retryDelayMs = 1200,
+} = {}) {
   return async function gemini({ lang, system, prompt, schema, image, temperature = 0.3, maxOutputTokens = 2048 }) {
     const langRule = languageInstruction(lang); // throws on invalid lang
     if (!apiKey) throw new AppError(503, 'model_not_configured', { message: 'GEMINI_API_KEY is not configured on the server.' });
@@ -40,7 +45,12 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODE
     const body = {
       systemInstruction: { parts: [{ text: `${langRule}\n\n${system}\n\n${DATA_GUARD}` }] },
       contents: [{ role: 'user', parts }],
-      generationConfig: { temperature: Math.min(temperature, 0.4), maxOutputTokens, responseMimeType: 'application/json', responseSchema: schema },
+      generationConfig: {
+        temperature: Math.min(temperature, 0.4),
+        maxOutputTokens,
+        responseMimeType: 'application/json',
+        responseSchema: schema,
+      },
     };
 
     // At most one retry: on malformed JSON, wrong-language output, or truncation (then with a higher cap).
