@@ -10,6 +10,15 @@
   --ok: #4caf50;
   --border: #2e4a66;
   --focus: #7ec8ff;
+  --accent-fg: #ffc107;
+  --danger-btn-bg: #5a1520;
+  --danger-btn-text: #fff;
+  --error-bg: #3a1218;
+  --error-text: #ffd6d6;
+  --field-error: #ffb4a8;
+  --invalid-outline: #ff6b57;
+  --overlay: rgba(11, 31, 51, 0.85);
+  color-scheme: dark;
   --radius: 12px;
   --tap: 48px;
   font-size: 18px;
@@ -78,7 +87,7 @@ body {
 .brand h1 {
   margin: 0;
   font-size: 1.35rem;
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 .tagline {
   margin: 0.2rem 0 0;
@@ -118,7 +127,7 @@ body {
 .tab[aria-selected='true'] {
   background: var(--accent);
   color: var(--accent-text);
-  border-color: var(--accent);
+  border-color: var(--accent-fg);
 }
 .main {
   padding: 1rem;
@@ -200,8 +209,8 @@ body {
   color: var(--text);
 }
 .btn.danger {
-  background: #5a1520;
-  color: #fff;
+  background: var(--danger-btn-bg);
+  color: var(--danger-btn-text);
   border-color: var(--danger);
 }
 .btn:disabled {
@@ -240,7 +249,7 @@ body {
 .chip input {
   width: 1.25rem;
   height: 1.25rem;
-  accent-color: var(--accent);
+  accent-color: var(--accent-fg);
 }
 fieldset {
   border: none;
@@ -252,20 +261,20 @@ legend {
   margin-bottom: 0.5rem;
 }
 .totals strong {
-  color: var(--accent);
+  color: var(--accent-fg);
   font-size: 1.2rem;
 }
 .result h3 {
   margin-top: 0;
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 .result ul {
   padding-left: 1.2rem;
 }
 .error-box {
-  background: #3a1218;
+  background: var(--error-bg);
   border: 2px solid var(--danger);
-  color: #ffd6d6;
+  color: var(--error-text);
   border-radius: var(--radius);
   padding: 1rem;
   margin: 1rem 0;
@@ -276,14 +285,14 @@ legend {
 .loading {
   position: fixed;
   inset: 0;
-  background: rgba(11, 31, 51, 0.85);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 .loading[hidden],
 [hidden] {
@@ -320,7 +329,7 @@ legend {
   color: var(--ok);
 }
 .risk-moderate {
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 .risk-high {
   color: var(--danger);
@@ -345,15 +354,93 @@ legend {
 /* Inline validation */
 .field-error {
   display: block;
-  color: #ffb4a8;
+  color: var(--field-error);
   font-weight: 600;
   margin-top: 4px;
 }
 [aria-invalid='true'] {
-  outline: 3px solid #ff6b57;
+  outline: 3px solid var(--invalid-outline);
   outline-offset: 2px;
 }
 .form-error {
-  color: #ffb4a8;
+  color: var(--field-error);
   font-weight: 700;
+}
+
+/* Light theme: same tokens, light values (WCAG AA contrast on white). Toggled via html[data-theme]. */
+:root[data-theme='light'] {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --text: #0b1f33;
+  --muted: #475569;
+  --accent: #ffc107;
+  --accent-text: #0b1f33;
+  --accent-fg: #8a5a00;
+  --danger: #c62828;
+  --ok: #2e7d32;
+  --border: #cbd5e1;
+  --focus: #005fcc;
+  --danger-btn-bg: #c62828;
+  --danger-btn-text: #fff;
+  --error-bg: #fdecea;
+  --error-text: #7f1d1d;
+  --field-error: #b3261e;
+  --invalid-outline: #c62828;
+  --overlay: rgba(244, 246, 249, 0.9);
+  color-scheme: light;
+}
+
+/* Header actions + light/dark switch */
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--tap);
+  padding: 0 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.theme-toggle .track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.theme-toggle .knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform 0.2s;
+}
+.theme-toggle[aria-checked='true'] .track {
+  background: var(--accent);
+}
+.theme-toggle[aria-checked='true'] .knob {
+  transform: translateX(18px);
+  background: var(--accent-text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle .track,
+  .theme-toggle .knob {
+    transition: none;
+  }
 }

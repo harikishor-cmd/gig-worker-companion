@@ -351,5 +351,8 @@
       "document": "your document",
       "safety": "your safety choices"
     }
+  },
+  "theme": {
+    "light": "Light mode"
   }
 }

@@ -1,6 +1,7 @@
 /* Gig Saathi — vanilla frontend. No build step. */
 (() => {
   const LS_LANG = 'gs_lang';
+  const LS_THEME = 'gs_theme';
   const LS_ENTRIES = 'gs_entries';
   const SUPPORTED = ['en', 'hi', 'pa'];
   let lang = localStorage.getItem(LS_LANG) || 'en';
@@ -758,6 +759,29 @@
   function escapeHtml(s) {
     return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
+
+  // ---- Light/dark theme (saved choice, else the OS preference). Applied before boot so there is no flash of the wrong theme after load. ----
+  /** @param {'light'|'dark'} theme */
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    const btn = document.getElementById('theme-toggle');
+    if (btn) btn.setAttribute('aria-checked', String(theme === 'light'));
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#0b1f33');
+  }
+  const savedTheme = localStorage.getItem(LS_THEME);
+  applyTheme(
+    savedTheme === 'light' || savedTheme === 'dark'
+      ? savedTheme
+      : window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark',
+  );
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem(LS_THEME, next);
+    applyTheme(next);
+  });
 
   // ---- Lang + tabs + boot ----
   $$('.tab').forEach((btn) => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
