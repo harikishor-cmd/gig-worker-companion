@@ -57,3 +57,33 @@ describe('worker placeholder stripping', () => {
     expect(joinGrievanceBody(['Sincerely,\n[Your name]'], 'Ravi')).toBe('Sincerely,\nRavi');
   });
 });
+
+describe('browser entry validation (web/entries.js)', async () => {
+  await import('../web/entries.js');
+  const { validateEntry, sanitizeEntries } = globalThis.GigEntries;
+  const today = '2026-10-17';
+  it('blocks an empty Save: date, paid and hours all flagged', () => {
+    const v = validateEntry({ date: '', platform: 'zomato', shift: 'day', gross: '', tips: '', expenses: '', hours: '', trips: '' }, today);
+    expect(v.ok).toBe(false);
+    expect(Object.keys(v.errors).sort()).toEqual(['date', 'gross', 'hours']);
+  });
+  it('blocks ₹0 / 0h', () => {
+    expect(validateEntry({ date: today, platform: 'zomato', shift: 'day', gross: 0, hours: 0 }, today).ok).toBe(false);
+  });
+  it('sanitizes stored entries: drops the hidden ₹0/0h entry, junk and >24h days, keeps valid ones', () => {
+    const good = { date: '2026-10-16', platform: 'swiggy', shift: 'night', gross: 900, tips: 0, expenses: 100, hours: 6, trips: 12 };
+    const clean = sanitizeEntries(
+      [
+        good,
+        { date: '2026-10-16', platform: 'zomato', shift: 'day', gross: 0, tips: 0, expenses: 0, hours: 0, trips: 0 },
+        null,
+        'x',
+        { ...good, hours: 20 },
+        { ...good, date: '2027-01-01' },
+      ],
+      today,
+    );
+    expect(clean).toEqual([good]);
+    expect(sanitizeEntries('not-an-array', today)).toEqual([]);
+  });
+});

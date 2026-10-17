@@ -341,3 +341,19 @@ legend {
   margin: 0.4rem 0;
   min-height: var(--tap);
 }
+
+/* Inline validation */
+.field-error {
+  display: block;
+  color: #ffb4a8;
+  font-weight: 600;
+  margin-top: 4px;
+}
+[aria-invalid='true'] {
+  outline: 3px solid #ff6b57;
+  outline-offset: 2px;
+}
+.form-error {
+  color: #ffb4a8;
+  font-weight: 700;
+}

@@ -20,13 +20,26 @@
     return v.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined && vars[k] !== null ? String(vars[k]) : `{${k}}`));
   }
 
+  /** Local YYYY-MM-DD (not UTC), so late-night IST entries get today's date. */
+  function todayLocal() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  const inrFmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+  /** One currency format everywhere: ₹2,430 (Indian grouping). */
+  const inr = (n) => `₹${inrFmt.format(Math.round(Number(n) || 0))}`;
+
+  /** Load entries and drop anything the API would reject (e.g. a ₹0 / 0h entry from an older build). */
   function loadEntries() {
+    let raw;
     try {
-      const raw = JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]');
-      return Array.isArray(raw) ? raw : [];
+      raw = JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]');
     } catch {
-      return [];
+      raw = [];
     }
+    const clean = window.GigEntries.sanitizeEntries(raw, todayLocal());
+    if (!Array.isArray(raw) || clean.length !== raw.length) localStorage.setItem(LS_ENTRIES, JSON.stringify(clean));
+    return clean;
   }
   function saveEntries() {
     localStorage.setItem(LS_ENTRIES, JSON.stringify(entries));
@@ -40,6 +53,16 @@
 
   function applyI18n() {
     document.documentElement.lang = lang;
+    // Every static label in index.html carries data-i18n / data-i18n-placeholder / data-i18n-aria.
+    $$('[data-i18n]').forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    $$('[data-i18n-placeholder]').forEach((el) => {
+      el.placeholder = t(el.dataset.i18nPlaceholder);
+    });
+    $$('[data-i18n-aria]').forEach((el) => {
+      el.setAttribute('aria-label', t(el.dataset.i18nAria));
+    });
     $('#app-name').textContent = t('app.name');
     $('#app-tagline').textContent = t('app.tagline');
     $('#lang-select').value = lang;
@@ -116,7 +139,10 @@
     const mapped = ERROR_ALIASES[code] || code;
     const key =
       mapped && i18n.error && i18n.error[mapped] ? `error.${mapped}` : code === 'network' ? 'error.network' : 'error.server_error';
-    let msg = t(key, { maxMb: 4, seconds: info.retryAfter || 60 });
+    let msg = t(info.status === 400 && key === 'error.server_error' ? 'error.invalidInput' : key, {
+      maxMb: 4,
+      seconds: info.retryAfter || 60,
+    });
     if (msg === key) msg = t('error.server_error');
     box.innerHTML = '';
     const p = document.createElement('p');
@@ -135,6 +161,48 @@
     }
     box.hidden = false;
   }
+  /**
+   * Mark invalid fields: aria-invalid, an inline ⚠ message linked by aria-describedby, and a form-level alert.
+   * @param {HTMLFormElement} form
+   * @param {Record<string,string>} errors field name -> i18n key
+   * @returns {boolean} true when there were errors
+   */
+  function setFieldErrors(form, errors) {
+    clearFieldErrors(form);
+    const names = Object.keys(errors);
+    if (!names.length) return false;
+    names.forEach((name) => {
+      let el = form.elements[name];
+      if (el && !el.tagName && el.length) el = el[0];
+      if (!el) return;
+      const id = `${form.id}-${name}-err`;
+      el.setAttribute('aria-invalid', 'true');
+      el.setAttribute('aria-describedby', id);
+      const msg = document.createElement('span');
+      msg.className = 'field-error';
+      msg.id = id;
+      msg.textContent = `⚠ ${t(errors[name], { max: 100000 })}`;
+      el.insertAdjacentElement('afterend', msg);
+    });
+    const box = $(`#${form.id}-error`);
+    if (box) {
+      box.textContent = t(form.id === 'earnings-form' ? 'earnings.form.fixErrors' : 'error.invalidInput');
+      box.hidden = false;
+    }
+    const first = form.querySelector('[aria-invalid="true"]');
+    if (first) first.focus();
+    return true;
+  }
+  function clearFieldErrors(form) {
+    $$('.field-error', form).forEach((n) => n.remove());
+    $$('[aria-invalid]', form).forEach((n) => {
+      n.removeAttribute('aria-invalid');
+      n.removeAttribute('aria-describedby');
+    });
+    const box = $(`#${form.id}-error`);
+    if (box) box.hidden = true;
+  }
+
   function clearError(boxId) {
     const b = $(boxId);
     if (b) {
@@ -188,6 +256,7 @@
       const e = new Error(json.error?.code || 'server_error');
       e.code = json.error?.code || 'server_error';
       e.status = res.status;
+      e.fields = Array.isArray(json.error?.fields) ? json.error.fields : [];
       if (res.status === 429) {
         const ra = Number(res.headers.get('retry-after'));
         const m = /t=(\d+)/.exec(res.headers.get('ratelimit') || '');
@@ -228,18 +297,18 @@
       totalHours += Number(e.hours) || 0;
     });
     $('#earnings-totals').innerHTML = week.length
-      ? `<p><strong>₹${Math.round(totalNet)}</strong> · ${totalHours.toFixed(1)} h · ${week.length} entries</p><p class="hint">${t('earnings.stats.computedNote')}</p>`
+      ? `<p><strong>${t('earnings.weekTotal', { amount: inrFmt.format(Math.round(totalNet)), hours: totalHours.toFixed(1) })}</strong> · ${t('earnings.entriesCount', { count: week.length })}</p><p class="hint">${t('earnings.stats.computedNote')}</p>`
       : `<p>${t('earnings.empty.title')}</p><p class="hint">${t('earnings.empty.body')}</p>`;
     week.forEach((e) => {
       const li = document.createElement('li');
       const net = netOf(e);
       const label = document.createElement('span');
-      label.textContent = `${e.date} · ${e.platform} · ${e.shift}: ₹${net} / ${e.hours}h`;
+      label.textContent = `${e.date} · ${t('earnings.entryLine', { platform: t(`enum.platform.${e.platform}`), shift: t(`enum.shift.${e.shift}`), net: inrFmt.format(Math.round(net)), hours: e.hours })}`;
       const del = document.createElement('button');
       del.type = 'button';
       del.className = 'btn secondary tap';
       del.textContent = t('common.delete');
-      del.setAttribute('aria-label', `Delete ${e.date}`);
+      del.setAttribute('aria-label', t('earnings.deleteLabel', { date: e.date, net: inrFmt.format(Math.round(net)) }));
       del.addEventListener('click', () => {
         if (!confirm(t('earnings.deleteConfirm'))) return;
         const i = entries.indexOf(e);
@@ -274,7 +343,7 @@
         cb.value = String(entries.indexOf(e));
         cb.id = id;
         const span = document.createElement('span');
-        span.textContent = `${e.date} ${e.platform} ₹${netOf(e)}`;
+        span.textContent = `${e.date} ${t(`enum.platform.${e.platform}`)} ${inr(netOf(e))}`;
         wrap.append(cb, span);
         box.appendChild(wrap);
       });
@@ -283,22 +352,16 @@
   // ---- Earnings form ----
   $('#earnings-form').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    const fd = new FormData(ev.target);
-    const entry = {
-      date: fd.get('date'),
-      platform: fd.get('platform'),
-      shift: fd.get('shift'),
-      gross: Number(fd.get('gross')),
-      tips: Number(fd.get('tips') || 0),
-      expenses: Number(fd.get('expenses') || 0),
-      hours: Number(fd.get('hours')),
-      trips: Number(fd.get('trips') || 0),
-    };
-    entries.push(entry);
+    const form = ev.target;
+    const fd = new FormData(form);
+    const raw = Object.fromEntries(['date', 'platform', 'shift', 'gross', 'tips', 'expenses', 'hours', 'trips'].map((k) => [k, fd.get(k)]));
+    const v = window.GigEntries.validateEntry(raw, todayLocal());
+    if (v.ok && window.GigEntries.hoursOn(entries, v.entry.date) + v.entry.hours > 24) v.errors.hours = 'earnings.form.dayOver24';
+    if (setFieldErrors(form, v.errors)) return; // nothing is stored
+    entries.push(v.entry);
     saveEntries();
-    ev.target.reset();
-    const today = new Date().toISOString().slice(0, 10);
-    ev.target.date.value = today;
+    form.reset();
+    form.date.value = todayLocal();
     renderEarnings();
     renderEvidence();
   });
@@ -310,7 +373,7 @@
     const prev = new Date(weekStart + 'T00:00:00');
     prev.setDate(prev.getDate() - 7);
     const prevStart = prev.toISOString().slice(0, 10);
-    const payloadEntries = entries.filter((e) => e.date >= prevStart);
+    const payloadEntries = window.GigEntries.sanitizeEntries(entries, todayLocal()).filter((e) => e.date >= prevStart);
     showLoading(t('earnings.summary.loading'));
     try {
       const data = await api('/api/summary', { lang, weekStart, entries: payloadEntries });
@@ -320,7 +383,7 @@
       html += `<p class="hint">${t('common.aiNote')}</p>`;
       if (data.stats?.totals) {
         const tot = data.stats.totals;
-        html += `<p>Net ₹${tot.net ?? '—'} · ${tot.hours ?? '—'} h · ${tot.trips ?? '—'} trips</p>`;
+        html += `<p>${t('earnings.summary.totalsLine', { net: inrFmt.format(Math.round(tot.net || 0)), hours: tot.hours ?? '—', trips: tot.trips ?? '—' })}</p>`;
       }
       if (!data.ai) {
         html += `<p>${t('earnings.summary.lowData')}</p>`;
@@ -370,7 +433,7 @@
       const box = $('#safety-result');
       box.hidden = false;
       let html = `<h3>${t('safety.resultTitle')}</h3><p class="hint">${t('common.aiNote')}</p>`;
-      html += `<p class="risk-${g.riskLevel || 'low'}"><strong>${escapeHtml(g.riskLevel || '')}</strong>${g.riskReason ? ' — ' + escapeHtml(g.riskReason) : ''}</p>`;
+      html += `<p class="risk-${g.riskLevel || 'low'}"><strong>${escapeHtml(g.riskLevel ? t(`safety.risk.${g.riskLevel}`) : '')}</strong>${g.riskReason ? ' — ' + escapeHtml(g.riskReason) : ''}</p>`;
       if (g.tips?.length) {
         html += '<ul>';
         g.tips.forEach((tip) => {
@@ -379,7 +442,7 @@
         html += '</ul>';
       }
       if (g.checklist?.length) {
-        html += '<h4>Checklist</h4><ul>';
+        html += `<h4>${t('safety.checklistTitle')}</h4><ul>`;
         g.checklist.forEach((c) => {
           html += `<li>${escapeHtml(c)}</li>`;
         });
@@ -435,7 +498,7 @@
   async function runSchemesAskOnce() {
     clearError('#schemes-error');
     const question = $('#schemes-question').value.trim();
-    if (question.length < 3) return;
+    if (setFieldErrors($('#schemes-form'), question.length < 3 ? { question: 'schemes.ask.questionMin' } : {})) return;
     showLoading(t('schemes.ask.loading'));
     try {
       const data = await api('/api/schemes/ask', { lang, question, profile: {} });
@@ -500,6 +563,11 @@
 
   $('#document-file').addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
+    // A new pick always clears the previous answer and error, so a rejected upload never shows a stale result.
+    clearError('#document-error');
+    const old = $('#document-result');
+    old.hidden = true;
+    old.innerHTML = '';
     if (!file) return;
     try {
       pendingImage = await resizeImage(file);
@@ -509,6 +577,7 @@
       $('#document-submit').disabled = false;
     } catch {
       pendingImage = null;
+      $('#document-preview').hidden = true;
       $('#document-submit').disabled = true;
       showError('#document-error', 'unsupported_media_type');
     }
@@ -516,7 +585,12 @@
 
   async function runDocumentOnce() {
     clearError('#document-error');
-    if (!pendingImage) return;
+    if (!pendingImage) {
+      const box = $('#document-error');
+      box.textContent = t('documents.chooseFirst');
+      box.hidden = false;
+      return;
+    }
     showLoading(t('documents.loading'));
     try {
       const data = await api('/api/document', {
@@ -566,6 +640,8 @@
         });
     } catch (err) {
       const code = err.code === 'unsupported_image' ? 'unsupported_media_type' : err.code || 'network';
+      $('#document-result').hidden = true;
+      $('#document-result').innerHTML = '';
       showError('#document-error', code, runDocument, err);
     } finally {
       hideLoading();
@@ -604,12 +680,20 @@
     if (fd.get('desiredOutcome')) body.desiredOutcome = String(fd.get('desiredOutcome')).trim();
     if (fd.get('workerName')) body.workerName = String(fd.get('workerName')).trim();
     if (fd.get('workerId')) body.workerId = String(fd.get('workerId')).trim();
+    const errs = {};
+    if (!/^[\p{L}\p{N} .&-]{2,60}$/u.test(body.against)) errs.against = 'grievance.form.againstInvalid';
+    if (body.issue === 'other' && (body.issueOther || '').length < 3) errs.issueOther = 'grievance.form.issueOtherRequired';
+    if (!body.incidentDate || body.incidentDate > todayLocal()) errs.incidentDate = 'grievance.form.dateRequired';
+    if (body.endDate && body.incidentDate && body.endDate < body.incidentDate) errs.endDate = 'grievance.form.endBeforeStart';
+    if (body.details.length < 20) errs.details = 'grievance.form.detailsMin';
+    if (body.workerId && !/^[A-Za-z0-9-]*$/.test(body.workerId)) errs.workerId = 'grievance.form.idInvalid';
+    if (setFieldErrors(form, errs)) return;
     showLoading(t('grievance.loading'));
     try {
       const data = await api('/api/grievance', body);
       const box = $('#grievance-result');
       box.hidden = false;
-      const text = `Subject: ${data.subject}\n\n${data.body}`;
+      const text = `${t('grievance.subjectLabel')}: ${data.subject}\n\n${data.body}`;
       let html = `<h3>${t('grievance.draftTitle')}</h3><p class="hint">${t('common.aiNote')}</p><p class="hint">${t('grievance.reviewNote')}</p>`;
       html += `<pre class="draft" id="draft-text">${escapeHtml(text)}</pre>`;
       html += `<button type="button" class="btn primary tap" id="copy-draft">${t('grievance.copy')}</button>`;
@@ -638,6 +722,25 @@
         a.click();
       });
     } catch (err) {
+      if (err.status === 400 && err.fields?.length) {
+        // Map server field errors (incl. sanitised/rejected text) onto the matching inputs.
+        const map = {
+          against: 'grievance.form.againstInvalid',
+          details: 'grievance.form.detailsMin',
+          issueOther: 'grievance.form.issueOtherRequired',
+          incidentDate: 'grievance.form.dateRequired',
+          endDate: 'grievance.form.endBeforeStart',
+          workerId: 'grievance.form.idInvalid',
+          workerName: 'grievance.form.textInvalid',
+          desiredOutcome: 'grievance.form.textInvalid',
+        };
+        const fe = {};
+        err.fields.forEach((f) => {
+          const name = String(f.path).split('.')[0];
+          if (form.elements[name]) fe[name] = map[name] || 'error.fieldInvalid';
+        });
+        if (setFieldErrors(form, fe)) return;
+      }
       showError('#grievance-error', err.code || 'network', runGrievance, err);
     } finally {
       hideLoading();
@@ -659,7 +762,11 @@
     lang = e.target.value;
     localStorage.setItem(LS_LANG, lang);
     await loadI18n(lang);
+    // Drop messages rendered in the previous language, then re-render language-dependent lists.
+    $$('form').forEach(clearFieldErrors);
+    ['#summary-error', '#safety-error', '#schemes-error', '#document-error', '#grievance-error'].forEach(clearError);
     applyI18n();
+    if (schemesRequested) loadSchemes();
   });
 
   (async function boot() {
@@ -673,7 +780,7 @@
       };
     }
     applyI18n();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayLocal();
     const df = $('#earnings-form');
     if (df.date) df.date.value = today;
     const gf = $('#grievance-form');
