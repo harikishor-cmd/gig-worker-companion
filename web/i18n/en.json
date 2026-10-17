@@ -90,7 +90,8 @@
       "loading": "Gemini is reading your week…",
       "basedOn": "Based on your {count} entries",
       "lowData": "Add entries on at least 2 days to get tips from Gemini.",
-      "insightsTitle": "Gemini's tips"
+      "insightsTitle": "Gemini's tips",
+      "totalsLine": "Kept ₹{net} · {hours} h · {trips} orders/rides"
     },
     "form": {
       "date": "Date",
@@ -106,7 +107,11 @@
       "note": "Note (stays on phone)",
       "amountInvalid": "Enter an amount from 0 to {max}.",
       "hoursInvalid": "Hours must be more than 0 and up to 24.",
-      "tripsInvalid": "Enter a whole number from 0 to 200."
+      "tripsInvalid": "Enter a whole number from 0 to 200.",
+      "dateRequired": "Pick a date (not in the future).",
+      "grossRequired": "Enter the amount paid by the app (more than 0).",
+      "dayOver24": "Total hours on this day can't be more than 24.",
+      "fixErrors": "Entry not saved. Please fix the fields marked ⚠."
     },
     "entryLine": "{platform} · {shift}: ₹{net} in {hours} h",
     "deleteLabel": "Delete entry: {date}, ₹{net}",
@@ -116,7 +121,8 @@
       "nightShare": "From night work",
       "vsLastWeek": "vs last week: {delta}%",
       "computedNote": "Numbers are worked out from your entries, not by AI."
-    }
+    },
+    "entriesCount": "{count} entries"
   },
   "safety": {
     "title": "Safety tips",
@@ -135,7 +141,15 @@
     },
     "emergencyTitle": "In danger? Call now",
     "call112": "Call 112 (emergency)",
-    "call1091": "Call 1091 (women helpline)"
+    "call1091": "Call 1091 (women helpline)",
+    "checklistTitle": "Checklist",
+    "risk": {
+      "low": "Low risk",
+      "moderate": "Medium risk",
+      "high": "High risk"
+    },
+    "call108": "Call 108 (ambulance)",
+    "call1033": "Call 1033 (highway help)"
   },
   "schemes": {
     "title": "Government schemes",
@@ -155,7 +169,8 @@
       "fallbackEshram": "e-Shram official portal",
       "fallbackMyScheme": "myScheme official portal",
       "usesProfile": "Your profile (age, work) is sent to help match.",
-      "groundedNote": "Answer uses only our verified scheme list."
+      "groundedNote": "Answer uses only our verified scheme list.",
+      "questionMin": "Write your question (at least 3 letters)."
     },
     "lastVerified": "Last checked: {date}",
     "benefits": "What you get",
@@ -187,7 +202,8 @@
       "whatToDo": "What you should do",
       "datesAmounts": "Dates and amounts written on it"
     },
-    "notDocument": "This doesn't look like a document. Try a photo of a letter or notice."
+    "notDocument": "This doesn't look like a document. Try a photo of a letter or notice.",
+    "chooseFirst": "Choose a photo first."
   },
   "grievance": {
     "title": "Write a complaint",
@@ -219,7 +235,15 @@
       "evidence": "Your logged earnings for these dates",
       "evidenceHint": "Ticked rows go into the complaint as proof.",
       "evidenceNone": "No logged entries for these dates.",
-      "desiredOutcomeCount": "{used} / {max} letters"
+      "desiredOutcomeCount": "{used} / {max} letters",
+      "optionalSuffix": "(optional)",
+      "detailsMin": "Write at least 20 letters about what happened.",
+      "againstInvalid": "Enter the app or company name (letters and numbers only).",
+      "issueOtherRequired": "Describe the problem in a few words.",
+      "dateRequired": "Pick the date it happened.",
+      "endBeforeStart": "'Till when' can't be before the start date.",
+      "textInvalid": "Please remove symbols like < > and write in plain words.",
+      "idInvalid": "Use only letters, numbers and -."
     },
     "channels": {
       "title": "Where to send it",
@@ -234,7 +258,17 @@
       "harassment": "Misbehaviour / harassment",
       "insurance_claim": "Accident / insurance claim",
       "other": "Something else"
-    }
+    },
+    "issueOpt": {
+      "payment_not_received": "Payment not received",
+      "wrong_deduction": "Wrong deduction",
+      "account_deactivated": "ID / account blocked",
+      "incentive_not_paid": "Incentive not paid",
+      "accident_insurance": "Accident / insurance",
+      "harassment_safety": "Harassment / safety",
+      "other": "Something else"
+    },
+    "subjectLabel": "Subject"
   },
   "error": {
     "network": "Could not connect. Check your internet and try again.",
@@ -243,13 +277,14 @@
     "server_error": "Something went wrong on our side. Please try again.",
     "model_unavailable": "The AI is not responding right now. Please try again.",
     "model_not_configured": "AI help is not set up on this server yet.",
-    "invalidInput": "Please fix the fields marked with ⚠.",
+    "invalidInput": "Please check your input and fix the fields marked ⚠.",
     "invalidLang": "Language not supported. Please pick again.",
     "payload_too_large": "Photo is too big. Max {maxMb} MB.",
     "unsupported_media_type": "Please choose a JPG, PNG or WEBP photo.",
     "fieldRequired": "Please fill in {field}.",
     "dateFuture": "Date can't be in the future.",
-    "model_bad_output": "The AI gave an unusable answer. Please try again."
+    "model_bad_output": "The AI gave an unusable answer. Please try again.",
+    "fieldInvalid": "Please check this field."
   },
   "enum": {
     "shift": {
