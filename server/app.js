@@ -1,5 +1,7 @@
+// Express app factory: security middleware, /api routes, static frontend. No listen() here so tests can import it.
 import express from 'express';
 import helmet from 'helmet';
+import compression from 'compression';
 import { rateLimit } from 'express-rate-limit';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -8,14 +10,36 @@ import { createCache } from './services/cache.js';
 import { loadSchemes } from './services/schemes-store.js';
 import { fail } from './http/envelope.js';
 import { notFound, errorHandler } from './http/errors.js';
+import { RATE_LIMIT_PER_MIN, JSON_LIMIT, DOCUMENT_JSON_LIMIT, STATIC_MAX_AGE } from './config.js';
 import summaryRouter from './routes/summary.js';
 import safetyRouter from './routes/safety.js';
 import schemesRouter from './routes/schemes.js';
 import documentRouter from './routes/document.js';
 import grievanceRouter from './routes/grievance.js';
 
+/** Strict CSP: same-origin only, no inline scripts, no framing, no plugins. */
+export const CSP_DIRECTIVES = {
+  'default-src': ["'self'"],
+  'script-src': ["'self'"],
+  'style-src': ["'self'"],
+  'img-src': ["'self'", 'data:', 'blob:'],
+  'font-src': ["'self'"],
+  'connect-src': ["'self'"],
+  'object-src': ["'none'"],
+  'base-uri': ["'self'"],
+  'form-action': ["'self'"],
+  'frame-ancestors': ["'none'"],
+};
+
 /**
- * @param {object} deps  injectable for tests: gemini (mocked), cache, getSchemes, staticDir, rateLimitPerMin
+ * Build the Express app.
+ * @param {object} [deps] injectable for tests
+ * @param {Function} [deps.gemini] mocked gemini()
+ * @param {ReturnType<typeof createCache>} [deps.cache]
+ * @param {() => Array<object>} [deps.getSchemes]
+ * @param {string|null} [deps.staticDir] null disables static serving
+ * @param {number} [deps.rateLimitPerMin]
+ * @returns {import('express').Express}
  */
 export function createApp(deps = {}) {
   const gemini = deps.gemini || createGemini();
@@ -27,29 +51,25 @@ export function createApp(deps = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1); // Cloud Run sits behind one proxy hop
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        'default-src': ["'self'"],
-        'img-src': ["'self'", 'data:', 'blob:'],
-        'style-src': ["'self'", 'https://fonts.googleapis.com'],
-        'font-src': ["'self'", 'https://fonts.gstatic.com'],
-        'connect-src': ["'self'"],
-      },
-    },
-  }));
+  app.use(helmet({ contentSecurityPolicy: { directives: CSP_DIRECTIVES }, crossOriginEmbedderPolicy: false }));
+  app.use(compression()); // gzip/deflate for HTML, JS, CSS, JSON
 
   const api = express.Router();
-  api.use(rateLimit({
-    windowMs: 60_000,
-    limit: deps.rateLimitPerMin ?? 30,
-    standardHeaders: 'draft-8',
-    legacyHeaders: false,
-    handler: (req, res) => fail(res, 429, 'rate_limited'),
-  }));
-  // Body limits: 32 KB JSON everywhere; /api/document allows a 4 MB image as base64 (~5.6 MB).
-  api.use('/document', express.json({ limit: '6mb' }));
-  api.use(express.json({ limit: '32kb' }));
+  api.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store'); // API answers can carry personal content
+    next();
+  });
+  api.use(
+    rateLimit({
+      windowMs: 60_000,
+      limit: deps.rateLimitPerMin ?? RATE_LIMIT_PER_MIN,
+      standardHeaders: 'draft-8',
+      legacyHeaders: false,
+      handler: (req, res) => fail(res, 429, 'rate_limited'),
+    }),
+  );
+  api.use('/document', express.json({ limit: DOCUMENT_JSON_LIMIT }));
+  api.use(express.json({ limit: JSON_LIMIT }));
   api.use('/summary', summaryRouter({ gemini, cache }));
   api.use('/safety', safetyRouter({ gemini, cache }));
   api.use('/schemes', schemesRouter({ gemini, getSchemes, cache }));
@@ -62,8 +82,14 @@ export function createApp(deps = {}) {
   app.get('/healthz', (req, res) => res.json({ ok: true }));
 
   if (staticDir && existsSync(staticDir)) {
-    app.use(express.static(staticDir, { maxAge: '1h', index: 'index.html' }));
-    app.get(/^(?!\/api\/).*/, (req, res) => res.sendFile('index.html', { root: staticDir }));
+    const noCacheHtml = (res, path) => {
+      if (path.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+    };
+    app.use(express.static(staticDir, { maxAge: STATIC_MAX_AGE, index: 'index.html', setHeaders: noCacheHtml }));
+    app.get(/^(?!\/api\/).*/, (req, res) => {
+      res.setHeader('Cache-Control', 'no-cache');
+      res.sendFile('index.html', { root: staticDir });
+    });
   }
   return app;
 }
