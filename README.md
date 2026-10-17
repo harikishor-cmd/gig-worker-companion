@@ -9,7 +9,7 @@ cd promptwars-gig-companion
 npm install
 cp .env.example .env
 # Edit .env and set GEMINI_API_KEY=<your key>
-# Optional: GEMINI_MODEL=gemini-3.5-flash  (or a model your key can call)
+# Optional: GEMINI_MODEL=gemini-3.5-flash-lite  (or a model your key can call)
 npm start
 ```
 
@@ -23,7 +23,7 @@ Do **not** commit `.env`. Never put the API key in frontend code.
 
 ## Stack
 
-- `server/` — Express API + Gemini proxy (`gemini-3.5-flash` by default)
+- `server/` — Express API + Gemini proxy (`gemini-3.5-flash-lite` by default)
 - `web/` — vanilla HTML/JS/CSS (no build step); Express serves `web/` statically
 - Earnings entries live in **localStorage** only (no login, no DB)
 
@@ -31,7 +31,7 @@ Do **not** commit `.env`. Never put the API key in frontend code.
 
 | Endpoint | Model | Prompt purpose | Server file |
 |---|---|---|---|
-| `POST /api/summary` | `gemini-3.5-flash` (env `GEMINI_MODEL`) | Explain code-computed weekly earnings stats (no invented numbers) | `server/routes/summary.js` |
+| `POST /api/summary` | `gemini-3.5-flash-lite` (env `GEMINI_MODEL`) | Explain code-computed weekly earnings stats (no invented numbers) | `server/routes/summary.js` |
 | `POST /api/safety` | same | Situational safety tips from vehicle/shift/situations; phones are static | `server/routes/safety.js` |
 | `POST /api/schemes/ask` | same | Eligibility Q&A grounded only in `server/data/schemes.json` | `server/routes/schemes.js` |
 | `POST /api/document` | same (+ Vision) | Explain an uploaded document photo in plain language | `server/routes/document.js` |

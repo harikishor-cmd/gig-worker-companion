@@ -51,7 +51,7 @@ export default function documentRouter({ gemini }) {
     if (buf.length > MAX_IMAGE_BYTES) return fail(res, 413, 'image_too_large');
     const real = sniffImage(buf);
     if (!real || real !== mimeType) return fail(res, 415, 'unsupported_image');
-    const raw = await gemini({ lang, system: SYSTEM, prompt: 'Explain this document.', image: { mimeType: real, data: b64 }, schema: DOCUMENT_SCHEMA, temperature: 0.2, maxOutputTokens: 1500 });
+    const raw = await gemini({ lang, system: SYSTEM, prompt: 'Explain this document.', image: { mimeType: real, data: b64 }, schema: DOCUMENT_SCHEMA, temperature: 0.2, maxOutputTokens: 8192 });
     ok(res, deepMask(raw));
   }));
   return r;

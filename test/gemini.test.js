@@ -12,7 +12,7 @@ describe('central gemini() helper', () => {
     const out = await gemini({ lang: 'pa', system: 'SYS', prompt: 'P', schema: { type: 'object' }, temperature: 0.9 });
     expect(out).toEqual({ subject: 's', body: 'b' });
     const [url, init] = fetchImpl.mock.calls[0];
-    expect(url).toContain('/models/gemini-3.5-flash:generateContent');
+    expect(url).toContain('/models/gemini-3.5-flash-lite:generateContent');
     expect(url).not.toContain('test-key');
     expect(init.headers['x-goog-api-key']).toBe('test-key');
     const body = JSON.parse(init.body);

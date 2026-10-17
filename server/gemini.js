@@ -3,7 +3,7 @@
 import { languageInstruction } from './lang.js';
 
 // Default gemini-3.5-flash (2.5-flash is closed to new API keys as of 2026-10); GEMINI_MODEL env overrides it.
-export const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+export const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /**
@@ -18,7 +18,7 @@ const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
  * @returns {Promise<object>} parsed JSON matching schema
  */
 export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODEL, fetchImpl = globalThis.fetch } = {}) {
-  return async function gemini({ lang, system, prompt, schema, image, temperature = 0.3, maxOutputTokens = 1024 }) {
+  return async function gemini({ lang, system, prompt, schema, image, temperature = 0.3, maxOutputTokens = 8192 }) {
     const langRule = languageInstruction(lang); // throws on invalid lang
     if (!apiKey) {
       const err = new Error('GEMINI_API_KEY is not configured on the server.');
@@ -44,12 +44,19 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, model = MODE
   };
 
   async function callOnce(body) {
-    const res = await fetchImpl(`${API_BASE}/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify(body),
-    });
+    let res;
+    // Retry transient Gemini overload/rate-limit responses (429/5xx) with short backoff.
+    for (let i = 0; i < 3; i++) {
+      res = await fetchImpl(`${API_BASE}/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify(body),
+      });
+      if (res.ok || !(res.status === 429 || res.status >= 500)) break;
+      if (i < 2) await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
+    }
     if (!res.ok) {
+      console.error(`Gemini HTTP ${res.status}`);
       const err = new Error(`Gemini request failed (${res.status})`);
       err.status = 502;
       err.code = 'model_unavailable';

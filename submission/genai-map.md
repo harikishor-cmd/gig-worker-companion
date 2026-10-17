@@ -1,6 +1,6 @@
 # GenAI usage map
 
-Model default (from `server/gemini.js`): `process.env.GEMINI_MODEL || 'gemini-3.5-flash'`.  
+Model default (from `server/gemini.js`): `process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite'`.  
 API: `generativelanguage.googleapis.com/v1beta/models/{model}:generateContent` with `responseMimeType: application/json` and a per-call `responseSchema`. Temperature capped at ≤ 0.4. Language instruction injected on every call (`server/lang.js`). One retry on malformed JSON; never a canned fallback.
 
 | # | Endpoint | Route file | Model | Input (validated) | Output schema (required fields) | Guardrail |

@@ -37,7 +37,7 @@ export default function grievanceRouter({ gemini }) {
   r.post('/', validate(schemas.grievance), handler(async (req, res) => {
     const v = req.valid;
     const facts = buildFacts(v, new Date().toISOString().slice(0, 10));
-    const raw = await gemini({ lang: v.lang, system: SYSTEM, prompt: `<facts>${JSON.stringify(facts)}</facts>`, schema: GRIEVANCE_SCHEMA, temperature: 0.3, maxOutputTokens: 1500 });
+    const raw = await gemini({ lang: v.lang, system: SYSTEM, prompt: `<facts>${JSON.stringify(facts)}</facts>`, schema: GRIEVANCE_SCHEMA, temperature: 0.3, maxOutputTokens: 8192 });
     const subject = String(raw.subject || '').trim().slice(0, 200);
     const body = String(raw.body || '').trim().slice(0, 6000);
     if (!subject || !body) { const e = new Error('empty draft'); e.status = 502; e.code = 'model_bad_output'; throw e; }
