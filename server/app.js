@@ -52,7 +52,7 @@ export function createApp(deps = {}) {
   api.use(express.json({ limit: '32kb' }));
   api.use('/summary', summaryRouter({ gemini, cache }));
   api.use('/safety', safetyRouter({ gemini, cache }));
-  api.use('/schemes', schemesRouter({ gemini, getSchemes }));
+  api.use('/schemes', schemesRouter({ gemini, getSchemes, cache }));
   api.use('/document', documentRouter({ gemini }));
   api.use('/grievance', grievanceRouter({ gemini }));
   api.use(notFound);

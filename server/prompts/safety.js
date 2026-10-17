@@ -2,7 +2,7 @@
 
 /** System instruction (task rules). The language rule and data-only guard are added by services/gemini.js. */
 export const SAFETY_SYSTEM = `You give practical, situational safety guidance to an Indian gig worker before or during a shift.
-Use only the situation given: vehicle, shift, situations.
+Use only the situation given in <input>: vehicle, shift, situations.
 Rules:
 - Concrete, doable actions for THIS combination. No generic filler.
 - Never invent facts about a specific city, road, crime rates, or statistics. Never claim to know live conditions.

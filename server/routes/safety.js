@@ -3,6 +3,8 @@ import { Router } from 'express';
 import { schemas } from '../validation/schemas.js';
 import { validate } from '../validation/validate.js';
 import { ok } from '../http/envelope.js';
+import { wrap } from '../services/sanitize.js';
+import { TOKEN_LIMITS } from '../config.js';
 import { SAFETY_SYSTEM, SAFETY_SCHEMA } from '../prompts/safety.js';
 
 // Static constants rendered by the UI (QA re-verifies before submission).
@@ -34,7 +36,7 @@ export default function safetyRouter({ gemini, cache }) {
     const key = cache.key({ f: 'B', input, lang });
     let guidance = cache.get(key);
     if (!guidance) {
-      const raw = await gemini({ lang, system: SAFETY_SYSTEM, prompt: JSON.stringify(input), schema: SAFETY_SCHEMA, temperature: 0.3 });
+      const raw = await gemini({ lang, system: SAFETY_SYSTEM, prompt: wrap('input', input), schema: SAFETY_SCHEMA, temperature: 0.3, maxOutputTokens: TOKEN_LIMITS.safety });
       const floor = riskFloor(input);
       const model = LEVELS.includes(raw.riskLevel) ? raw.riskLevel : floor;
       guidance = {

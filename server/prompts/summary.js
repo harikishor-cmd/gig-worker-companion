@@ -2,7 +2,7 @@
 
 /** System instruction (task rules). The language rule and data-only guard are added by services/gemini.js. */
 export const SUMMARY_SYSTEM = `You help an Indian gig worker understand their own week of earnings.
-You are given ONLY numbers computed from their logged entries. Rules:
+You are given ONLY numbers computed from their logged entries, inside <input>. Rules:
 - Use only the numbers in the input. Never invent, estimate, or assume any figure, platform, city, rate, or market comparison.
 - Every insight must cite which input field it is based on in "basis".
 - If a comparison needs data that is null or missing, do not make it.

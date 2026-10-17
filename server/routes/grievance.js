@@ -6,6 +6,8 @@ import { numbersIn } from '../services/stats.js';
 import { ok } from '../http/envelope.js';
 import { AppError } from '../http/errors.js';
 import { logger } from '../services/logger.js';
+import { wrap } from '../services/sanitize.js';
+import { TOKEN_LIMITS } from '../config.js';
 import { GRIEVANCE_SYSTEM, GRIEVANCE_SCHEMA } from '../prompts/grievance.js';
 
 // Static verified complaint channels (never generated). QA re-verifies before submission.
@@ -34,7 +36,7 @@ export default function grievanceRouter({ gemini }) {
   r.post('/', validate(schemas.grievance), async (req, res) => {
     const v = req.valid;
     const facts = buildFacts(v, new Date().toISOString().slice(0, 10));
-    const raw = await gemini({ lang: v.lang, system: GRIEVANCE_SYSTEM, prompt: `<facts>${JSON.stringify(facts)}</facts>`, schema: GRIEVANCE_SCHEMA, temperature: 0.3, maxOutputTokens: 8192 });
+    const raw = await gemini({ lang: v.lang, system: GRIEVANCE_SYSTEM, prompt: wrap('facts', facts), schema: GRIEVANCE_SCHEMA, temperature: 0.3, maxOutputTokens: TOKEN_LIMITS.grievance });
     const subject = String(raw.subject || '').trim().slice(0, 200);
     const body = joinGrievanceBody(raw.body, v.workerName);
     if (!subject || !body) throw new AppError(502, 'model_bad_output', { message: 'empty draft' });

@@ -2,6 +2,15 @@
 // outside the whitelist can reach a prompt.
 import { z } from 'zod';
 import { SUPPORTED_LANGS } from '../services/lang.js';
+import { cleanUserText } from '../services/sanitize.js';
+
+/**
+ * Free text that may reach a prompt: control chars stripped and delimiters neutralised (see services/sanitize.js),
+ * then length-checked on the cleaned value.
+ * @param {number} min
+ * @param {number} max
+ */
+const userText = (min, max) => z.string().max(max * 2).transform(cleanUserText).pipe(z.string().min(min).max(max));
 
 export const lang = z.enum(SUPPORTED_LANGS);
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD').refine((d) => !Number.isNaN(Date.parse(`${d}T00:00:00Z`)), 'invalid date');
@@ -39,7 +48,7 @@ export const schemas = {
 
   schemesAsk: z.object({
     lang,
-    question: z.string().trim().min(3).max(500),
+    question: userText(3, 500),
     profile: z.object({
       vehicle: z.enum(['two_wheeler', 'bicycle', 'car_auto', 'on_foot']).optional(),
       shift: z.enum(SHIFTS).optional(),
@@ -58,12 +67,12 @@ export const schemas = {
     lang,
     against: z.string().trim().min(2).max(60).regex(/^[\p{L}\p{N} .&-]+$/u, 'letters, numbers and spaces only'),
     issue: z.enum(['payment_not_received', 'wrong_deduction', 'account_deactivated', 'incentive_not_paid', 'accident_insurance', 'harassment_safety', 'other']),
-    issueOther: z.string().trim().min(3).max(100).optional(),
+    issueOther: userText(3, 100).optional(),
     incidentDate: isoDate.refine(notFuture, 'date is in the future'),
     endDate: isoDate.refine(notFuture, 'date is in the future').optional(),
-    details: z.string().trim().min(20).max(2000),
-    desiredOutcome: z.string().trim().max(300).optional(),
-    workerName: z.string().trim().max(80).optional(),
+    details: userText(20, 2000),
+    desiredOutcome: userText(0, 300).optional(),
+    workerName: userText(0, 80).optional(),
     workerId: z.string().trim().max(40).regex(/^[A-Za-z0-9-]*$/).optional(),
     amount: z.number().finite().nonnegative().max(1000000).optional(),
     evidence: z.array(entry).max(31).default([]),
