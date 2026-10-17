@@ -82,8 +82,8 @@ export function createApp(deps = {}) {
   app.get('/healthz', (req, res) => res.json({ ok: true }));
 
   if (staticDir && existsSync(staticDir)) {
-    const noCacheHtml = (res, path) => {
-      if (path.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+    const noCacheHtml = (res) => {
+      res.setHeader('Cache-Control', 'no-cache');
     };
     app.use(express.static(staticDir, { maxAge: STATIC_MAX_AGE, index: 'index.html', setHeaders: noCacheHtml }));
     app.get(/^(?!\/api\/).*/, (req, res) => {

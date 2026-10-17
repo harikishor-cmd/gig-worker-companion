@@ -116,6 +116,6 @@ describe('static assets', () => {
     expect(html.text).not.toMatch(/<script>(?!<\/script>)|<style|style="|on(click|load)="/); // CSP-safe markup
     const js = await request(app).get('/app.js').set('Accept-Encoding', 'gzip');
     expect(js.headers['content-encoding']).toBe('gzip');
-    expect(js.headers['cache-control']).toBe('public, max-age=3600');
+    expect(js.headers['cache-control']).toBe('no-cache');
   });
 });

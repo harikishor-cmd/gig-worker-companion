@@ -29,5 +29,5 @@ export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 export const CACHE_TTL_MS = 6 * 3600e3;
 export const CACHE_MAX_ENTRIES = 500;
 
-/** Static asset caching: hashed-free assets get a short max-age; index.html is always revalidated. */
-export const STATIC_MAX_AGE = '1h';
+/** Static asset caching: assets are not content-hashed, so browsers always revalidate (cheap 304 via ETag) and never run stale code after a deploy. */
+export const STATIC_MAX_AGE = 0;
